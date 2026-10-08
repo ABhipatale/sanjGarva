@@ -1,4 +1,4 @@
-# Sanj Garva · संज गरवा — Bar Management PWA
+# Saanj Garva · सांज गारवा — Bar Management PWA
 
 Single-bar stock, sales, udhari (khata) and profit app. Marathi + English, mobile-first, installable.
 

@@ -47,9 +47,9 @@ export default function Login() {
 
       <div className="relative flex flex-1 flex-col items-center justify-center px-4 pb-10">
         <div className="mb-6 flex flex-col items-center text-center text-white">
-          <img src={logo} alt="Sanj Garva" className="size-36 object-contain drop-shadow-2xl" />
-          <h1 className="mt-4 text-3xl font-extrabold tracking-tight">संज गरवा</h1>
-          <p className="text-lg font-semibold text-gold-300">Sanj Garva</p>
+          <img src={logo} alt="Saanj Garva" className="size-36 object-contain drop-shadow-2xl" />
+          <h1 className="mt-4 text-3xl font-extrabold tracking-tight">सांज गारवा</h1>
+          <p className="text-lg font-semibold text-gold-300">Saanj Garva</p>
           <p className="mt-1 text-sm text-brand-200">{t('app.tagline')}</p>
         </div>
 

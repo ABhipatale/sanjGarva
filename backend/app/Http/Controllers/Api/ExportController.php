@@ -26,7 +26,7 @@ class ExportController extends Controller
     {
         abort_unless(in_array($type, self::TYPES, true), 404);
         $range = DateRange::fromRequest($request, 'all');
-        $filename = 'sanj-garva-'.$type.'-'.now()->format('Y-m-d').'.csv';
+        $filename = 'saanj-garva-'.$type.'-'.now()->format('Y-m-d').'.csv';
 
         return response()->streamDownload(function () use ($type, $range, $reports) {
             $out = fopen('php://output', 'w');

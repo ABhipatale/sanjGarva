@@ -193,7 +193,7 @@ export default function Settings() {
       >
         {t('nav.logout')}
       </Button>
-      <p className="pb-4 text-center text-xs text-slate-400">Sanj Garva · संज गरवा · v1.0</p>
+      <p className="pb-4 text-center text-xs text-slate-400">Saanj Garva · सांज गारवा · v1.0</p>
     </div>
   )
 }

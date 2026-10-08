@@ -11,8 +11,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.png', 'logo-256.png', 'icons/apple-touch-icon.png'],
       manifest: {
-        name: 'Sanj Garva — संज गरवा',
-        short_name: 'Sanj Garva',
+        name: 'Saanj Garva — सांज गारवा',
+        short_name: 'Saanj Garva',
         description: 'Bar stock, sales & udhari management',
         lang: 'mr',
         start_url: '/',

@@ -11,8 +11,8 @@ use Illuminate\Support\Facades\Cache;
 class SettingsService
 {
     public const DEFAULTS = [
-        'bar_name' => 'Sanj Garva',
-        'bar_name_mr' => 'संज गरवा',
+        'bar_name' => 'Saanj Garva',
+        'bar_name_mr' => 'सांज गारवा',
         'phone' => '',
         'address' => '',
         'gstin' => '',

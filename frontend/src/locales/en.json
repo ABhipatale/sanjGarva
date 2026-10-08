@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "Sanj Garva",
+    "name": "Saanj Garva",
     "tagline": "Bar stock, sales & khata — simple."
   },
   "nav": {
@@ -416,7 +416,7 @@
     "account": "Account",
     "appInfo": "App",
     "install": "Install App",
-    "installHint": "Install Sanj Garva on this phone for quick access."
+    "installHint": "Install Saanj Garva on this phone for quick access."
   },
   "empty": {
     "customers": "No customers added yet.",

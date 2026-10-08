@@ -78,5 +78,5 @@ export const reportApi = {
   profitLoss: (params) => api.get('/reports/profit-loss', params),
   udhari: (params) => api.get('/reports/udhari', params),
   expenses: (params) => api.get('/reports/expenses', params),
-  export: (type, params) => api.download(`/export/${type}`, params, `sanj-garva-${type}.csv`),
+  export: (type, params) => api.download(`/export/${type}`, params, `saanj-garva-${type}.csv`),
 }
