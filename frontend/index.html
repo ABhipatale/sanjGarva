@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="mr">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#4c1d95" />
+    <meta name="description" content="Sanj Garva — bar stock, sales and udhari management" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Sanj Garva" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <title>Sanj Garva — संज गरवा</title>
+    <style>
+      /* Splash shown until React mounts */
+      #splash{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:linear-gradient(160deg,#4c1d95,#1e0b3a);color:#fde68a;font-family:Mukta,system-ui,sans-serif}
+      #splash img{width:140px;height:140px;filter:drop-shadow(0 12px 30px rgba(0,0,0,.45))}
+      #splash b{font-size:22px;letter-spacing:.5px}
+    </style>
+  </head>
+  <body>
+    <div id="root"><div id="splash"><img src="/logo-256.png" alt="Sanj Garva" /><b>संज गरवा</b></div></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
