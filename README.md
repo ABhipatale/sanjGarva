@@ -72,8 +72,9 @@ weighted-average COGS, P&L, bill cancellation, adjustments, auth, every read/exp
 ## Replacing the logo
 
 - In the app: Settings → Upload Logo (stored in the database, works on any host).
-- For the app icon / splash: replace `frontend/public/favicon.svg` (and `src/assets/logo.svg`), then run `npm run icons`
-  to regenerate `public/icons/*.png`.
+- Default logo everywhere (login, header, sidebar, splash, favicon, PWA/home-screen icons): `frontend/branding/logo-source.png`.
+  To change it, replace that file and run `npm run icons` in `frontend/` — it regenerates `src/assets/logo.webp`,
+  `public/favicon.png`, `public/logo-256.png` and `public/icons/*.png` in optimized sizes.
 
 ## Deployment
 
