@@ -41,6 +41,9 @@
   input[type="number"] { -moz-appearance: textfield; }
 }
 
+/* Phones/windows with room to spare vertically (e.g. 390×844); used to scale up the login screen. */
+@custom-variant tall (@media (min-height: 800px));
+
 @utility pb-safe { padding-bottom: env(safe-area-inset-bottom); }
 @utility pt-safe { padding-top: env(safe-area-inset-top); }
 

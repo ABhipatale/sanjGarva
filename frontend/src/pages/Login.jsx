@@ -48,19 +48,19 @@ export default function Login() {
         <LanguageToggle dark />
       </div>
 
-      <div className="relative mx-auto flex w-full max-w-5xl flex-1 flex-col items-center justify-center gap-5 px-4 pb-[calc(env(safe-area-inset-bottom)+20px)] pt-[calc(env(safe-area-inset-top)+64px)] lg:flex-row lg:justify-between lg:gap-16 lg:px-8 lg:py-10">
+      <div className="relative mx-auto flex w-full max-w-5xl flex-1 flex-col items-center justify-center gap-5 px-4 pb-[calc(env(safe-area-inset-bottom)+20px)] pt-[calc(env(safe-area-inset-top)+64px)] max-lg:tall:gap-9 lg:flex-row lg:justify-between lg:gap-16 lg:px-8 lg:py-10">
         <div className="flex flex-col items-center text-center text-white lg:flex-1 lg:items-start lg:text-left">
-          <img src={logo} alt="Saanj Garva" className="size-24 object-contain drop-shadow-2xl sm:size-28 lg:size-44" />
-          <h1 className="mt-3 text-2xl font-extrabold leading-tight tracking-tight sm:text-3xl lg:mt-6 lg:text-5xl">सांज गारवा</h1>
-          <p className="text-base font-semibold text-gold-300 lg:mt-1 lg:text-2xl">Saanj Garva</p>
-          <p className="mt-1 text-sm text-brand-200 lg:mt-4 lg:max-w-sm lg:text-lg">{t('app.tagline')}</p>
+          <img src={logo} alt="Saanj Garva" className="size-24 object-contain drop-shadow-2xl max-lg:tall:size-36 lg:size-44" />
+          <h1 className="mt-3 text-2xl font-extrabold leading-tight tracking-tight max-lg:tall:mt-5 max-lg:tall:text-4xl lg:mt-6 lg:text-5xl">सांज गारवा</h1>
+          <p className="text-base font-semibold text-gold-300 max-lg:tall:mt-1 max-lg:tall:text-xl lg:mt-1 lg:text-2xl">Saanj Garva</p>
+          <p className="mt-1 text-sm text-brand-200 max-lg:tall:mt-2 max-lg:tall:text-base lg:mt-4 lg:max-w-sm lg:text-lg">{t('app.tagline')}</p>
         </div>
 
-        <form onSubmit={submit} className="w-full max-w-sm rounded-3xl bg-white p-5 shadow-2xl animate-slide-up sm:p-6 lg:max-w-md lg:p-8" noValidate>
-          <h2 className="text-xl font-extrabold text-slate-900">{t('auth.loginTitle')}</h2>
-          <p className="mb-5 text-[15px] text-slate-500 lg:mb-6">{t('auth.loginSubtitle')}</p>
+        <form onSubmit={submit} className="w-full max-w-sm rounded-3xl bg-white p-5 shadow-2xl animate-slide-up max-lg:tall:p-7 lg:max-w-md lg:p-8" noValidate>
+          <h2 className="text-xl font-extrabold text-slate-900 max-lg:tall:text-2xl">{t('auth.loginTitle')}</h2>
+          <p className="mb-5 text-[15px] text-slate-500 max-lg:tall:mb-7 lg:mb-6">{t('auth.loginSubtitle')}</p>
 
-          <div className="space-y-4">
+          <div className="space-y-4 max-lg:tall:space-y-5">
             <Input
               label={t('auth.loginField')}
               value={form.login}
