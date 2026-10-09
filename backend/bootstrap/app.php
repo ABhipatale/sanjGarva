@@ -1,6 +1,7 @@
 <?php
 
 use App\Exceptions\BusinessException;
+use App\Http\Middleware\EnsureDatabaseMigrated;
 use App\Http\Middleware\SetLocale;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -30,7 +31,7 @@ return Application::configure(basePath: dirname(__DIR__))
         },
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->api(prepend: [SetLocale::class]);
+        $middleware->api(prepend: [SetLocale::class, EnsureDatabaseMigrated::class]);
         // Token auth only (Bearer) — no cookies, so no CSRF surface for the API.
     })
     ->withExceptions(function (Exceptions $exceptions): void {

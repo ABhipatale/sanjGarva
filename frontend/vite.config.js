@@ -31,7 +31,7 @@ export default defineConfig({
         // App shell is precached; API calls always go to the network.
         globPatterns: ['**/*.{js,css,html,svg,png,webp,woff2}'],
         navigateFallback: '/index.html',
-        navigateFallbackDenylist: [/^\/api\//],
+        navigateFallbackDenylist: [/^\/api\//, /^\/up$/],
         runtimeCaching: [
           {
             urlPattern: ({ url }) => url.origin === 'https://fonts.googleapis.com' || url.origin === 'https://fonts.gstatic.com',

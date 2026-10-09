@@ -7,33 +7,22 @@ if [ -n "$PORT" ]; then
     sed -i "s/<VirtualHost \*:80>/<VirtualHost *:$PORT>/g" /etc/apache2/sites-available/*.conf
 fi
 
-# Vercel's Neon integration provides DATABASE_URL (or POSTGRES_URL); Laravel reads DB_URL.
-DB_URL="${DB_URL:-${DATABASE_URL:-${POSTGRES_URL:-}}}"
-if [ -n "$DB_URL" ]; then
-    export DB_URL
-    export DB_CONNECTION="${DB_CONNECTION:-pgsql}"
+# config/database.php picks up DB_URL, DATABASE_URL or POSTGRES_URL (Vercel's Neon integration).
+if [ -z "${DB_URL:-${DATABASE_URL:-${POSTGRES_URL:-}}}" ] && [ -z "$DB_HOST" ]; then
+    echo "ERROR: no database configured. Connect a Neon database in Vercel → Storage, then redeploy."
 fi
 
+# APP_KEY is optional here: without one, derive a stable key from the database URL so every
+# container agrees. (The API uses Sanctum tokens stored in the database, not encrypted cookies.)
 if [ -z "$APP_KEY" ]; then
-    echo "WARNING: APP_KEY is not set; generating a temporary key. Set APP_KEY in Vercel so logins survive restarts."
-    export APP_KEY="$(php artisan key:generate --show)"
-fi
-
-if [ -n "$DB_URL" ] || { [ -n "$DB_HOST" ] && [ "$DB_HOST" != "127.0.0.1" ] && [ "$DB_HOST" != "localhost" ]; }; then
-    echo "Running migrations..."
-    if php artisan migrate --force; then
-        php artisan db:seed --force || echo "WARNING: db:seed failed."
-    else
-        echo "ERROR: migrations failed. Check the database URL and credentials."
-    fi
-else
-    echo "ERROR: no database configured. Connect a Neon database so DATABASE_URL is set."
+    APP_KEY="$(php -r '$s = getenv("DB_URL") ?: getenv("DATABASE_URL") ?: getenv("POSTGRES_URL") ?: random_bytes(32); echo "base64:".base64_encode(hash("sha256", "saanj-garva|".$s, true));')"
+    export APP_KEY
 fi
 
 php artisan config:cache || true
 php artisan route:cache || true
 
-# Cached files were written as root; Apache runs as www-data.
+# Cache files were written as root; Apache runs as www-data.
 chown -R www-data:www-data storage bootstrap/cache
 
 exec "$@"

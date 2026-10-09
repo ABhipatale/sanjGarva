@@ -30,7 +30,8 @@ ENV APP_ENV=production \
     SESSION_DRIVER=array \
     CACHE_STORE=database \
     QUEUE_CONNECTION=sync \
-    FILESYSTEM_DISK=local
+    FILESYSTEM_DISK=local \
+    AUTO_MIGRATE=true
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 COPY . /var/www/html

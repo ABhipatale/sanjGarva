@@ -41,6 +41,10 @@ return [
 
     'debug' => (bool) env('APP_DEBUG', false),
 
+    // Run pending migrations (and the base seed on an empty database) on the first API request.
+    // Enabled in the Vercel container, where there is no deploy-time shell to run artisan.
+    'auto_migrate' => (bool) env('AUTO_MIGRATE', false),
+
     /*
     |--------------------------------------------------------------------------
     | Application URL
