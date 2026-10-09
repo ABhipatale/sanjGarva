@@ -37,25 +37,28 @@ export default function Login() {
   const general = error && !error.errors ? error.message : null
 
   return (
-    <div className="relative flex min-h-dvh flex-col bg-linear-to-br from-brand-950 via-brand-900 to-brand-800">
-      <div className="pointer-events-none absolute -right-24 -top-24 size-80 rounded-full bg-gold-400/20 blur-3xl" aria-hidden />
-      <div className="pointer-events-none absolute -bottom-32 -left-24 size-96 rounded-full bg-brand-500/30 blur-3xl" aria-hidden />
+    <div className="relative flex min-h-dvh flex-col overflow-x-hidden bg-linear-to-br from-brand-950 via-brand-900 to-brand-800">
+      {/* Glows are clipped to the screen so they never add scrollbars or extra page height. */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
+        <div className="absolute -right-24 -top-24 size-80 rounded-full bg-gold-400/20 blur-3xl" />
+        <div className="absolute -bottom-24 -left-24 size-96 rounded-full bg-brand-500/30 blur-3xl" />
+      </div>
 
-      <div className="relative flex justify-end p-4 pt-[calc(env(safe-area-inset-top)+16px)]">
+      <div className="absolute right-4 top-[calc(env(safe-area-inset-top)+12px)] z-10 lg:right-8 lg:top-8">
         <LanguageToggle dark />
       </div>
 
-      <div className="relative flex flex-1 flex-col items-center justify-center px-4 pb-10">
-        <div className="mb-6 flex flex-col items-center text-center text-white">
-          <img src={logo} alt="Saanj Garva" className="size-36 object-contain drop-shadow-2xl" />
-          <h1 className="mt-4 text-3xl font-extrabold tracking-tight">सांज गारवा</h1>
-          <p className="text-lg font-semibold text-gold-300">Saanj Garva</p>
-          <p className="mt-1 text-sm text-brand-200">{t('app.tagline')}</p>
+      <div className="relative mx-auto flex w-full max-w-5xl flex-1 flex-col items-center justify-center gap-5 px-4 pb-[calc(env(safe-area-inset-bottom)+20px)] pt-[calc(env(safe-area-inset-top)+64px)] lg:flex-row lg:justify-between lg:gap-16 lg:px-8 lg:py-10">
+        <div className="flex flex-col items-center text-center text-white lg:flex-1 lg:items-start lg:text-left">
+          <img src={logo} alt="Saanj Garva" className="size-24 object-contain drop-shadow-2xl sm:size-28 lg:size-44" />
+          <h1 className="mt-3 text-2xl font-extrabold leading-tight tracking-tight sm:text-3xl lg:mt-6 lg:text-5xl">सांज गारवा</h1>
+          <p className="text-base font-semibold text-gold-300 lg:mt-1 lg:text-2xl">Saanj Garva</p>
+          <p className="mt-1 text-sm text-brand-200 lg:mt-4 lg:max-w-sm lg:text-lg">{t('app.tagline')}</p>
         </div>
 
-        <form onSubmit={submit} className="w-full max-w-sm rounded-3xl bg-white p-6 shadow-2xl animate-slide-up" noValidate>
+        <form onSubmit={submit} className="w-full max-w-sm rounded-3xl bg-white p-5 shadow-2xl animate-slide-up sm:p-6 lg:max-w-md lg:p-8" noValidate>
           <h2 className="text-xl font-extrabold text-slate-900">{t('auth.loginTitle')}</h2>
-          <p className="mb-5 text-[15px] text-slate-500">{t('auth.loginSubtitle')}</p>
+          <p className="mb-5 text-[15px] text-slate-500 lg:mb-6">{t('auth.loginSubtitle')}</p>
 
           <div className="space-y-4">
             <Input
