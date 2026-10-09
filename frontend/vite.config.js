@@ -26,7 +26,7 @@ export default defineConfig({
           { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
           { src: '/icons/icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
-      },
+      }, 
       workbox: {
         // App shell is precached; API calls always go to the network.
         globPatterns: ['**/*.{js,css,html,svg,png,webp,woff2}'],
