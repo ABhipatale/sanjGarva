@@ -4,14 +4,12 @@ use App\Exceptions\BusinessException;
 use App\Http\Middleware\EnsureDatabaseMigrated;
 use App\Http\Middleware\SetLocale;
 use Illuminate\Auth\AuthenticationException;
-use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -22,13 +20,6 @@ return Application::configure(basePath: dirname(__DIR__))
         api: __DIR__.'/../routes/api.php',
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
-        then: function () {
-            RateLimiter::for('login', fn (Request $request) => [
-                Limit::perMinute(5)->by(mb_strtolower((string) $request->input('login')).'|'.$request->ip()),
-                Limit::perMinute(20)->by($request->ip()),
-            ]);
-            RateLimiter::for('api', fn (Request $request) => Limit::perMinute(300)->by($request->user()?->id ?: $request->ip()));
-        },
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->api(prepend: [SetLocale::class, EnsureDatabaseMigrated::class]);
