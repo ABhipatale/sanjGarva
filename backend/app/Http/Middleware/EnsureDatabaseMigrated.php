@@ -2,8 +2,10 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Product;
 use App\Models\User;
 use Closure;
+use Database\Seeders\DemoSeeder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Log;
@@ -38,6 +40,9 @@ class EnsureDatabaseMigrated
             Artisan::call('migrate', ['--force' => true]);
             if (! User::query()->exists()) {
                 Artisan::call('db:seed', ['--force' => true]);
+            }
+            if (config('app.demo_data') && ! Product::query()->exists()) {
+                Artisan::call('db:seed', ['--class' => DemoSeeder::class, '--force' => true]);
             }
             file_put_contents($flag, now()->toIso8601String());
             @unlink(self::errorFile());

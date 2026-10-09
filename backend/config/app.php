@@ -45,6 +45,9 @@ return [
     // Enabled in the Vercel container, where there is no deploy-time shell to run artisan.
     'auto_migrate' => (bool) env('AUTO_MIGRATE', false),
 
+    // With auto_migrate: also load the DemoSeeder sample bar data while the database has no products.
+    'demo_data' => (bool) env('DEMO_DATA', false),
+
     /*
     |--------------------------------------------------------------------------
     | Application URL
