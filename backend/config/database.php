@@ -3,8 +3,11 @@
 use Illuminate\Support\Str;
 use Pdo\Mysql;
 
-// Hosted Postgres (Vercel + Neon) provides DATABASE_URL / POSTGRES_URL; DB_URL wins when set.
-$databaseUrl = env('DB_URL') ?: env('DATABASE_URL') ?: env('POSTGRES_URL');
+// Hosted Postgres (Vercel + Neon). DB_URL wins when set. Otherwise prefer the direct (unpooled) URL:
+// through Neon's PgBouncer pooler, PDO's statement cleanup fails inside transactions and aborts them.
+$databaseUrl = env('DB_URL')
+    ?: env('DATABASE_URL_UNPOOLED') ?: env('POSTGRES_URL_NON_POOLING')
+    ?: env('DATABASE_URL') ?: env('POSTGRES_URL');
 
 return [
 
