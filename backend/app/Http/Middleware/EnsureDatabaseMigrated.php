@@ -40,8 +40,23 @@ class EnsureDatabaseMigrated
                 Artisan::call('db:seed', ['--force' => true]);
             }
             file_put_contents($flag, now()->toIso8601String());
+            @unlink(self::errorFile());
         } catch (Throwable $e) {
             Log::error('Automatic migration failed: '.$e->getMessage());
+            @file_put_contents(self::errorFile(), $e->getMessage());
         }
+    }
+
+    /** Last failure, shown by /api/health (credentials never appear in these messages). */
+    public static function lastError(): ?string
+    {
+        $message = @file_get_contents(self::errorFile());
+
+        return $message === false ? null : mb_substr($message, 0, 500);
+    }
+
+    private static function errorFile(): string
+    {
+        return storage_path('framework/database-migration-error');
     }
 }

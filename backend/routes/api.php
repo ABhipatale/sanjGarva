@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\SaleController;
 use App\Http\Controllers\Api\SettingsController;
 use App\Http\Controllers\Api\StockController;
+use App\Http\Middleware\EnsureDatabaseMigrated;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
@@ -32,6 +33,8 @@ Route::get('health', function () {
         'driver' => config('database.default'),
         'database' => $database,
         'has_app_key' => filled(config('app.key')),
+        'auto_migrate' => (bool) config('app.auto_migrate'),
+        'migration_error' => EnsureDatabaseMigrated::lastError(),
     ], $migrated ? 200 : 503);
 });
 
