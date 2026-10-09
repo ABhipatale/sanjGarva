@@ -28,57 +28,56 @@ class DemoSeeder extends Seeder
     {
         $this->call(DatabaseSeeder::class);
         $userId = User::value('id');
+        Category::firstOrCreate(['name' => 'Country Liquor', 'parent_id' => null], ['name_mr' => 'देशी दारू', 'sort_order' => 11]);
         $cat = fn (string $name) => Category::where('name', $name)->value('id');
 
+        // A village bar: mostly quarters (180 ml) and nips (90 ml), strong beer and country liquor.
         $products = [
             // name, marathi, category, brand, unit, size, cost, sell, store, shop, min
-            ['Kingfisher Premium', 'किंगफिशर प्रीमियम', 'Beer', 'Kingfisher', 'bottle', '650 ml', 100, 150, 120, 24, 10],
-            ['Kingfisher Strong', 'किंगफिशर स्ट्रॉंग', 'Beer', 'Kingfisher', 'bottle', '650 ml', 110, 160, 96, 20, 10],
-            ['Kingfisher Ultra', 'किंगफिशर अल्ट्रा', 'Beer', 'Kingfisher', 'bottle', '650 ml', 130, 190, 48, 6, 8],
-            ['Tuborg Strong', 'टुबॉर्ग स्ट्रॉंग', 'Beer', 'Tuborg', 'can', '500 ml', 95, 140, 72, 12, 8],
-            ['Tuborg Green', 'टुबॉर्ग ग्रीन', 'Beer', 'Tuborg', 'bottle', '650 ml', 105, 155, 60, 12, 8],
-            ['Budweiser', 'बडवायझर', 'Beer', 'AB InBev', 'bottle', '650 ml', 140, 200, 60, 10, 8],
-            ['Budweiser Magnum', 'बडवायझर मॅग्नम', 'Beer', 'AB InBev', 'bottle', '650 ml', 150, 210, 36, 4, 6],
-            ['Carlsberg Elephant', 'कार्ल्सबर्ग एलिफंट', 'Beer', 'Carlsberg', 'bottle', '650 ml', 135, 190, 48, 8, 6],
-            ['Heineken', 'हायनेकेन', 'Beer', 'Heineken', 'bottle', '650 ml', 145, 210, 24, 0, 6],
-            ['Bira 91 White', 'बीरा 91 व्हाईट', 'Beer', 'Bira 91', 'can', '330 ml', 90, 140, 48, 12, 8],
-            ["Hayward's 5000", 'हेवर्ड्स 5000', 'Beer', "Hayward's", 'bottle', '650 ml', 95, 145, 72, 18, 10],
-            ['Corona Extra', 'कोरोना एक्स्ट्रा', 'Beer', 'AB InBev', 'bottle', '330 ml', 180, 260, 24, 3, 6],
+            ['GM Santra', 'जीएम संत्रा', 'Country Liquor', 'GM Breweries', 'bottle', '180 ml', 60, 80, 240, 48, 24],
+            ['GM Santra Nip', 'जीएम संत्रा नीप', 'Country Liquor', 'GM Breweries', 'bottle', '90 ml', 32, 45, 192, 36, 24],
+            ['GM Limbu Punch', 'जीएम लिंबू पंच', 'Country Liquor', 'GM Breweries', 'bottle', '180 ml', 60, 80, 144, 30, 24],
+            ['GM Doctor', 'जीएम डॉक्टर', 'Country Liquor', 'GM Breweries', 'bottle', '180 ml', 65, 85, 96, 12, 18],
 
-            ['Blenders Pride', 'ब्लेंडर्स प्राईड', 'Whisky', 'Pernod Ricard', 'bottle', '750 ml', 900, 1200, 30, 4, 5],
-            ['Royal Stag', 'रॉयल स्टॅग', 'Whisky', 'Pernod Ricard', 'bottle', '750 ml', 650, 850, 40, 10, 5],
-            ["McDowell's No.1", 'मॅकडॉवेल्स नं.1', 'Whisky', "McDowell's", 'bottle', '750 ml', 600, 780, 36, 6, 5],
-            ['Imperial Blue', 'इम्पीरियल ब्लू', 'Whisky', 'Pernod Ricard', 'bottle', '750 ml', 560, 740, 36, 8, 5],
-            ["Officer's Choice", 'ऑफिसर्स चॉईस', 'Whisky', 'Allied Blenders', 'bottle', '750 ml', 450, 600, 48, 12, 6],
-            ['Signature', 'सिग्नेचर', 'Whisky', 'Diageo', 'bottle', '750 ml', 1000, 1350, 18, 3, 3],
-            ['Antiquity Blue', 'अँटिक्विटी ब्लू', 'Whisky', 'Diageo', 'bottle', '750 ml', 1100, 1450, 12, 2, 3],
-            ['100 Pipers', '100 पायपर्स', 'Whisky', 'Pernod Ricard', 'bottle', '750 ml', 1500, 1950, 12, 2, 2],
-            ["Teacher's Highland Cream", 'टीचर्स हायलँड क्रीम', 'Whisky', 'Beam Suntory', 'bottle', '750 ml', 1700, 2200, 6, 1, 2],
+            ['Kingfisher Strong', 'किंगफिशर स्ट्रॉंग', 'Beer', 'Kingfisher', 'bottle', '650 ml', 110, 160, 96, 24, 12],
+            ['Kingfisher Strong Pint', 'किंगफिशर स्ट्रॉंग पिंट', 'Beer', 'Kingfisher', 'bottle', '330 ml', 65, 95, 72, 18, 12],
+            ['Kingfisher Premium', 'किंगफिशर प्रीमियम', 'Beer', 'Kingfisher', 'bottle', '650 ml', 100, 150, 48, 12, 8],
+            ["Hayward's 5000", 'हेवर्ड्स 5000', 'Beer', "Hayward's", 'bottle', '650 ml', 95, 145, 96, 24, 12],
+            ['Knock Out', 'नॉक आऊट', 'Beer', 'SABMiller', 'bottle', '650 ml', 100, 150, 72, 4, 12],
+            ['Tuborg Strong', 'टुबॉर्ग स्ट्रॉंग', 'Beer', 'Tuborg', 'can', '500 ml', 95, 140, 48, 12, 8],
+            ['Budweiser Magnum', 'बडवायझर मॅग्नम', 'Beer', 'AB InBev', 'bottle', '650 ml', 150, 210, 24, 6, 6],
 
-            ['Old Monk', 'ओल्ड मंक', 'Rum', 'Mohan Meakin', 'bottle', '750 ml', 350, 480, 50, 8, 5],
-            ['Bacardi White', 'बकार्डी व्हाईट', 'Rum', 'Bacardi', 'bottle', '750 ml', 800, 1050, 18, 3, 3],
-            ["McDowell's No.1 Celebration", 'मॅकडॉवेल्स सेलिब्रेशन रम', 'Rum', "McDowell's", 'bottle', '750 ml', 400, 550, 30, 6, 4],
+            ["Officer's Choice Quarter", 'ऑफिसर्स चॉईस क्वार्टर', 'Whisky', 'Allied Blenders', 'bottle', '180 ml', 120, 160, 144, 30, 24],
+            ["Officer's Choice Nip", 'ऑफिसर्स चॉईस नीप', 'Whisky', 'Allied Blenders', 'bottle', '90 ml', 62, 85, 96, 24, 18],
+            ["McDowell's No.1 Quarter", 'मॅकडॉवेल्स नं.1 क्वार्टर', 'Whisky', "McDowell's", 'bottle', '180 ml', 150, 200, 96, 18, 18],
+            ['Imperial Blue Quarter', 'इम्पीरियल ब्लू क्वार्टर', 'Whisky', 'Pernod Ricard', 'bottle', '180 ml', 145, 190, 72, 12, 12],
+            ['Royal Stag Quarter', 'रॉयल स्टॅग क्वार्टर', 'Whisky', 'Pernod Ricard', 'bottle', '180 ml', 170, 220, 72, 6, 12],
+            ['Royal Stag', 'रॉयल स्टॅग', 'Whisky', 'Pernod Ricard', 'bottle', '750 ml', 650, 850, 12, 3, 3],
+            ['8PM Whisky Quarter', '8 पीएम व्हिस्की क्वार्टर', 'Whisky', 'Radico Khaitan', 'bottle', '180 ml', 115, 155, 72, 12, 12],
+            ['Bagpiper Quarter', 'बॅगपायपर क्वार्टर', 'Whisky', 'United Spirits', 'bottle', '180 ml', 115, 155, 48, 0, 12],
+            ['Blenders Pride Quarter', 'ब्लेंडर्स प्राईड क्वार्टर', 'Whisky', 'Pernod Ricard', 'bottle', '180 ml', 230, 300, 24, 4, 6],
 
-            ['Magic Moments', 'मॅजिक मोमेंट्स', 'Vodka', 'Radico', 'bottle', '750 ml', 550, 720, 20, 0, 3],
-            ['Smirnoff', 'स्मरनॉफ', 'Vodka', 'Diageo', 'bottle', '750 ml', 750, 980, 18, 4, 3],
-            ['Romanov', 'रोमानोव्ह', 'Vodka', 'Diageo', 'bottle', '750 ml', 420, 560, 24, 6, 4],
+            ['Old Monk Quarter', 'ओल्ड मंक क्वार्टर', 'Rum', 'Mohan Meakin', 'bottle', '180 ml', 95, 130, 96, 24, 18],
+            ['Old Monk', 'ओल्ड मंक', 'Rum', 'Mohan Meakin', 'bottle', '750 ml', 350, 480, 12, 3, 3],
+            ["McDowell's No.1 Celebration Quarter", 'मॅकडॉवेल्स सेलिब्रेशन रम क्वार्टर', 'Rum', "McDowell's", 'bottle', '180 ml', 105, 140, 48, 12, 12],
 
-            ['Honey Bee', 'हनी बी', 'Brandy', 'Mohan Meakin', 'bottle', '750 ml', 420, 560, 30, 6, 4],
-            ['Mansion House', 'मॅन्शन हाऊस', 'Brandy', 'Tilaknagar', 'bottle', '750 ml', 500, 660, 24, 2, 4],
+            ['Honey Bee Quarter', 'हनी बी क्वार्टर', 'Brandy', 'Mohan Meakin', 'bottle', '180 ml', 110, 150, 72, 18, 12],
+            ['Mansion House Quarter', 'मॅन्शन हाऊस क्वार्टर', 'Brandy', 'Tilaknagar', 'bottle', '180 ml', 125, 165, 48, 10, 12],
 
-            ['Blue Riband', 'ब्लू रिबँड', 'Gin', 'Diageo', 'bottle', '750 ml', 500, 650, 12, 3, 2],
-            ['Greater Than', 'ग्रेटर दॅन', 'Gin', 'Nao Spirits', 'bottle', '750 ml', 1400, 1800, 6, 1, 2],
+            ['Romanov Quarter', 'रोमानोव्ह क्वार्टर', 'Vodka', 'United Spirits', 'bottle', '180 ml', 110, 150, 48, 12, 12],
+            ['Magic Moments Quarter', 'मॅजिक मोमेंट्स क्वार्टर', 'Vodka', 'Radico Khaitan', 'bottle', '180 ml', 140, 185, 24, 3, 6],
 
-            ['Sula Red', 'सुला रेड', 'Wine', 'Sula', 'bottle', '750 ml', 700, 950, 12, 2, 3],
-            ['Sula Chenin Blanc', 'सुला शेनिन ब्लांक', 'Wine', 'Sula', 'bottle', '750 ml', 750, 990, 12, 2, 3],
-
-            ['Coca-Cola', 'कोका-कोला', 'Soft Drinks', 'Coca-Cola', 'bottle', '750 ml', 30, 50, 96, 24, 12],
-            ['Thums Up', 'थम्स अप', 'Soft Drinks', 'Coca-Cola', 'bottle', '750 ml', 30, 50, 96, 24, 12],
-            ['Bisleri Soda', 'बिस्लेरी सोडा', 'Water & Soda', 'Bisleri', 'bottle', '600 ml', 15, 30, 120, 40, 20],
-            ['Bisleri Water', 'बिस्लेरी पाणी', 'Water & Soda', 'Bisleri', 'bottle', '1 L', 12, 20, 120, 36, 20],
+            ['Thums Up', 'थम्स अप', 'Soft Drinks', 'Coca-Cola', 'bottle', '250 ml', 15, 20, 96, 24, 12],
+            ['Sprite', 'स्प्राईट', 'Soft Drinks', 'Coca-Cola', 'bottle', '250 ml', 15, 20, 72, 24, 12],
+            ['Soda', 'सोडा', 'Water & Soda', 'Local', 'bottle', '600 ml', 10, 20, 144, 48, 24],
+            ['Water Bottle', 'पाण्याची बाटली', 'Water & Soda', 'Bisleri', 'bottle', '1 L', 12, 20, 96, 24, 12],
+            ['Water Pouch', 'पाणी पाऊच', 'Water & Soda', 'Local', 'piece', '250 ml', 2, 5, 400, 100, 50],
 
             ['Masala Peanuts', 'मसाला शेंगदाणे', 'Snacks', 'House', 'piece', '100 g', 20, 40, 80, 20, 10],
-            ["Lay's Classic", 'लेज क्लासिक', 'Snacks', "Lay's", 'piece', '52 g', 18, 30, 60, 15, 10],
+            ['Farsan', 'फरसाण', 'Snacks', 'Local', 'piece', '100 g', 15, 30, 60, 15, 10],
+            ['Chana Chakna', 'चणा चकणा', 'Snacks', 'House', 'piece', '100 g', 15, 30, 60, 15, 10],
+            ['Boiled Egg', 'उकडलेले अंडे', 'Snacks', 'House', 'piece', '1 pc', 7, 15, 60, 30, 12],
+            ['Masala Papad', 'मसाला पापड', 'Snacks', 'House', 'piece', '1 pc', 10, 30, 50, 20, 10],
         ];
 
         DB::transaction(function () use ($products, $cat, $stock, $userId) {
@@ -109,14 +108,16 @@ class DemoSeeder extends Seeder
             $id = fn (string $name) => Product::where('name', $name)->value('id');
             $customer = fn (string $name) => Customer::where('name', $name)->value('id');
             $demoSales = [
-                [[['Kingfisher Premium', 2], ['Old Monk', 1]], 'cash', null],
-                [[['Kingfisher Strong', 3], ['Bisleri Soda', 2]], 'udhari', 'Ramesh Patil'],
-                [[['Bisleri Soda', 4], ['Masala Peanuts', 2]], 'other', null],
-                [[['Royal Stag', 1], ['Thums Up', 2], ['Masala Peanuts', 1]], 'cash', null],
-                [[['Budweiser', 4], ["Lay's Classic", 2]], 'cash', null],
-                [[['Blenders Pride', 1], ['Bisleri Water', 2]], 'udhari', 'Mahesh Shinde'],
-                [[['Tuborg Strong', 6]], 'cash', null],
-                [[['Smirnoff', 1], ['Coca-Cola', 2]], 'other', null],
+                [[['GM Santra', 2], ['Water Pouch', 2], ['Chana Chakna', 1]], 'cash', null],
+                [[["Officer's Choice Quarter", 1], ['Soda', 1], ['Masala Peanuts', 1]], 'cash', null],
+                [[['Kingfisher Strong', 2], ['Boiled Egg', 2]], 'udhari', 'Ramesh Patil'],
+                [[['Old Monk Quarter', 1], ['Thums Up', 1]], 'other', null],
+                [[["Hayward's 5000", 3], ['Farsan', 1]], 'cash', null],
+                [[["McDowell's No.1 Quarter", 1], ['Soda', 2], ['Masala Papad', 1]], 'udhari', 'Mahesh Shinde'],
+                [[['GM Limbu Punch', 3], ['GM Santra Nip', 2]], 'cash', null],
+                [[['Honey Bee Quarter', 1], ['Sprite', 1], ['Boiled Egg', 1]], 'cash', null],
+                [[['Royal Stag Quarter', 1], ['Water Bottle', 1]], 'udhari', 'Ganesh Pawar'],
+                [[['Kingfisher Strong Pint', 4]], 'other', null],
             ];
             foreach ($demoSales as [$items, $method, $customerName]) {
                 $lines = array_map(fn ($i) => ['product_id' => $id($i[0]), 'quantity' => $i[1]], $items);
