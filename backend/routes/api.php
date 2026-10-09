@@ -12,7 +12,28 @@ use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\SaleController;
 use App\Http\Controllers\Api\SettingsController;
 use App\Http\Controllers\Api\StockController;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Schema;
+
+// Deployment check: is the database reachable and migrated? Reports no secrets.
+Route::get('health', function () {
+    try {
+        DB::connection()->getPdo();
+        $migrated = Schema::hasTable('users');
+        $database = $migrated ? 'ok' : 'not migrated (users table missing)';
+    } catch (Throwable) {
+        $migrated = false;
+        $database = 'connection failed (check DATABASE_URL)';
+    }
+
+    return response()->json([
+        'status' => $migrated ? 'ready' : 'degraded',
+        'driver' => config('database.default'),
+        'database' => $database,
+        'has_app_key' => filled(config('app.key')),
+    ], $migrated ? 200 : 503);
+});
 
 Route::post('auth/login', [AuthController::class, 'login'])->middleware('throttle:login');
 

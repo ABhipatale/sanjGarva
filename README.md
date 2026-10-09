@@ -78,7 +78,16 @@ weighted-average COGS, P&L, bill cancellation, adjustments, auth, every read/exp
 
 ## Deployment
 
-### Frontend → Vercel
+### Everything on one Vercel project (recommended)
+`vercel.json` (repo root) runs both apps as Vercel Services on one domain: `/api/*` and `/up` go to the Laravel container
+(`backend/Dockerfile.vercel`), everything else to the Vite frontend. The frontend calls `/api` on the same origin, so no
+`VITE_API_URL` or CORS setup is needed.
+1. Vercel → Add New → Project → this repo. Root Directory `./`, Application Preset **Services**. Deploy.
+2. Project → Storage → connect a Neon database with prefix `DATABASE` (creates `DATABASE_URL`).
+3. Settings → Environment Variables: `APP_KEY` (from `php artisan key:generate --show`). Redeploy.
+4. On start the container runs `migrate --force` and `db:seed --force` (idempotent). Check `/api/health` → `"status":"ready"`.
+
+### Frontend → Vercel (separate project)
 1. Import the repo, set **Root Directory** = `frontend` (framework: Vite).
 2. Environment variable: `VITE_API_URL=https://api.yourdomain.com/api`
 3. `vercel.json` already rewrites all routes to `index.html` (React Router) and sets cache headers for the service worker and assets.
