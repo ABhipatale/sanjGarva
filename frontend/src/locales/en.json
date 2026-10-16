@@ -21,7 +21,8 @@
     "more": "More",
     "stockHistory": "Stock History",
     "adjustStock": "Stock Adjustment",
-    "logout": "Logout"
+    "logout": "Logout",
+    "closing": "Day Closing"
   },
   "common": {
     "save": "Save",
@@ -210,6 +211,32 @@
     "emptyShopHint": "Transfer stock from the Store to start selling.",
     "noHistory": "No stock movements yet.",
     "lowAlert": "{{count}} products are running low"
+  },
+  "closing": {
+    "title": "Day Closing",
+    "subtitle": "Count what is left — sold stock is removed automatically",
+    "howTo": "Count each item and type how many are LEFT. Sold = Now − Left, and it is removed from stock and added to today’s sales. Leave blank what you did not count.",
+    "now": "Now",
+    "left": "Left",
+    "sold": "{{qty}} sold",
+    "noSale": "No sale",
+    "notCounted": "Not counted",
+    "tooMany": "Left cannot be more than {{qty}}",
+    "countedOf": "{{done}} of {{total}} items counted",
+    "totalSold": "Total sold",
+    "save": "Save Closing",
+    "confirmTitle": "Save closing: {{qty}} sold for {{amount}}?",
+    "confirmUncounted": "{{count}} items not counted will stay as they are.",
+    "soldSummary": "{{qty}} sold for {{amount}}",
+    "savedTitle": "Day closing saved",
+    "nothingEntered": "Type the remaining stock for at least one item.",
+    "empty": "No stock in {{location}} to count.",
+    "clear": "Clear",
+    "clearConfirm": "Clear all typed counts?",
+    "paidBy": "Money received as",
+    "badge": "Closing",
+    "cardTitle": "Day Closing",
+    "cardHint": "Type remaining stock — sales are calculated for you"
   },
   "products": {
     "title": "Products",
@@ -435,6 +462,8 @@
     "PAYMENT_EXCEEDS_BALANCE": "Amount is more than outstanding balance ({{balance}}).",
     "HAS_HISTORY": "This record has history and cannot be deleted.",
     "ALREADY_VOIDED": "This bill is already cancelled.",
-    "PRODUCT_INACTIVE": "{{product}} is inactive."
+    "PRODUCT_INACTIVE": "{{product}} is inactive.",
+    "COUNT_MORE_THAN_STOCK": "Remaining {{product}} cannot be more than {{available}} (current stock). Use Stock Adjustment if you found extra.",
+    "NOTHING_SOLD": "Nothing sold: every count is the same as current stock."
   }
 }

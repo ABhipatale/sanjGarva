@@ -19,11 +19,14 @@ return [
     'ALREADY_VOIDED' => 'This bill is already cancelled.',
     'PRODUCT_INACTIVE' => ':product is inactive.',
     'NO_CHANGE' => 'Actual quantity is the same as system quantity.',
+    'COUNT_MORE_THAN_STOCK' => 'Remaining :product cannot be more than :available (current stock). Use Stock Adjustment if you found extra.',
+    'NOTHING_SOLD' => 'Nothing sold: every remaining count is the same as current stock.',
 
     'stock_added' => 'Stock added to Store.',
     'transferred' => ':qty transferred to Shop successfully.',
     'adjusted' => 'Stock adjusted.',
     'sale_saved' => 'Sale saved.',
     'sale_voided' => 'Bill cancelled.',
+    'closing_saved' => 'Day closing saved: :qty sold for :amount.',
     'payment_received' => 'Payment received.',
 ];

@@ -26,6 +26,8 @@ class SaleResource extends JsonResource
             'total_cost' => $this->total_cost,
             'profit' => $this->profit,
             'status' => $this->status,
+            'source' => $this->source ?? 'pos',
+            'stock_location' => $this->stock_location ?? 'shop',
             'sold_at' => $this->sold_at?->toIso8601String(),
             'notes' => $this->notes,
             'voided_at' => $this->voided_at?->toIso8601String(),

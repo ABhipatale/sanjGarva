@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Customer;
 use App\Models\ExpenseCategory;
 use App\Models\Product;
+use App\Models\Sale;
 use App\Models\ShopStock;
 use App\Models\StockTransaction;
 use App\Models\StoreStock;
@@ -192,6 +193,80 @@ class BarFlowTest extends TestCase
         $this->assertSame(10, $this->qty($p['id'])['shop']);
         $this->assertSame('100.00', Customer::find($c['id'])->balance);
         $this->assertSame('0.00', $this->getJson('/api/dashboard')->json('data.today.sales'));
+    }
+
+    public function test_day_closing_records_sold_stock_as_one_bill(): void
+    {
+        $beer = $this->product(['opening_store' => 100, 'opening_shop' => 10]);
+        $rum = $this->product(['name' => 'Old Monk', 'selling_price' => 200, 'opening_store' => 0, 'opening_shop' => 5]);
+        $soda = $this->product(['name' => 'Soda', 'selling_price' => 20, 'opening_store' => 0, 'opening_shop' => 8]);
+
+        // 10 beer in Shop, 4 left → 6 sold. Rum: 2 sold. Soda unchanged → skipped.
+        $sale = $this->postJson('/api/sales/closing', [
+            'location' => 'shop',
+            'payment_method' => 'cash',
+            'counts' => [
+                ['product_id' => $beer['id'], 'remaining' => 4],
+                ['product_id' => $rum['id'], 'remaining' => 3],
+                ['product_id' => $soda['id'], 'remaining' => 8],
+            ],
+        ])->assertCreated()
+            ->assertJsonPath('data.source', 'closing')
+            ->assertJsonPath('data.stock_location', 'shop')
+            ->assertJsonPath('data.total_qty', 8)
+            ->assertJsonPath('data.total_amount', '1300.00') // 6 × 150 + 2 × 200
+            ->assertJsonCount(2, 'data.items')
+            ->json('data');
+
+        $this->assertSame(['store' => 100, 'shop' => 4], $this->qty($beer['id']));
+        $this->assertSame(['store' => 0, 'shop' => 3], $this->qty($rum['id']));
+        $this->assertSame(['store' => 0, 'shop' => 8], $this->qty($soda['id']));
+        $this->assertSame(1, StockTransaction::where('product_id', $beer['id'])->where('type', 'sale')->where('quantity', -6)->count());
+
+        // Counts in today's sales and profit like any other bill.
+        $this->getJson('/api/sales')->assertJsonPath('meta.summary.sales', '1300.00');
+
+        // A wrong closing is undone by cancelling the bill.
+        $this->postJson("/api/sales/{$sale['id']}/void")->assertOk();
+        $this->assertSame(['store' => 100, 'shop' => 10], $this->qty($beer['id']));
+    }
+
+    public function test_day_closing_from_store_and_cancel_returns_to_store(): void
+    {
+        $p = $this->product(['opening_store' => 10, 'opening_shop' => 0]);
+
+        $sale = $this->postJson('/api/sales/closing', [
+            'location' => 'store',
+            'payment_method' => 'other',
+            'counts' => [['product_id' => $p['id'], 'remaining' => 4]],
+        ])->assertCreated()->assertJsonPath('data.total_qty', 6)->json('data');
+
+        $this->assertSame(['store' => 4, 'shop' => 0], $this->qty($p['id']));
+
+        $this->postJson("/api/sales/{$sale['id']}/void")->assertOk();
+        $this->assertSame(['store' => 10, 'shop' => 0], $this->qty($p['id']));
+    }
+
+    public function test_day_closing_rejects_counts_above_stock_and_nothing_sold(): void
+    {
+        $p = $this->product(['opening_store' => 50, 'opening_shop' => 10]);
+
+        $this->postJson('/api/sales/closing', [
+            'location' => 'shop',
+            'payment_method' => 'cash',
+            'counts' => [['product_id' => $p['id'], 'remaining' => 12]],
+        ])->assertStatus(422)
+            ->assertJsonPath('code', 'COUNT_MORE_THAN_STOCK')
+            ->assertJsonPath('meta.available', 10);
+
+        $this->postJson('/api/sales/closing', [
+            'location' => 'shop',
+            'payment_method' => 'cash',
+            'counts' => [['product_id' => $p['id'], 'remaining' => 10]],
+        ])->assertStatus(422)->assertJsonPath('code', 'NOTHING_SOLD');
+
+        $this->assertSame(['store' => 50, 'shop' => 10], $this->qty($p['id']));
+        $this->assertSame(0, Sale::count());
     }
 
     public function test_stock_adjustment_is_logged(): void

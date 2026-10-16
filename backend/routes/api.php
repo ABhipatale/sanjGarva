@@ -68,6 +68,7 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     // Sales
     Route::get('sales', [SaleController::class, 'index']);
     Route::post('sales', [SaleController::class, 'store']);
+    Route::post('sales/closing', [SaleController::class, 'closing']);
     Route::get('sales/{sale}', [SaleController::class, 'show']);
     Route::post('sales/{sale}/void', [SaleController::class, 'void']);
 

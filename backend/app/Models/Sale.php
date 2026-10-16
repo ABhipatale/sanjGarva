@@ -11,9 +11,11 @@ class Sale extends Model
 {
     public const METHODS = ['cash', 'udhari', 'other'];
 
+    public const SOURCES = ['pos', 'closing'];
+
     protected $fillable = [
         'invoice_no', 'customer_id', 'payment_method', 'total_qty', 'total_amount', 'total_cost',
-        'profit', 'status', 'sold_at', 'notes', 'voided_at', 'void_reason', 'user_id',
+        'profit', 'status', 'sold_at', 'notes', 'voided_at', 'void_reason', 'user_id', 'source', 'stock_location',
     ];
 
     protected function casts(): array

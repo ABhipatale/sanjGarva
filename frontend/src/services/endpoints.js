@@ -50,6 +50,7 @@ export const saleApi = {
   list: (params) => api.get('/sales', params),
   get: (id) => api.get(`/sales/${id}`),
   create: (data) => api.post('/sales', data),
+  closing: (data) => api.post('/sales/closing', data),
   void: (id, reason) => api.post(`/sales/${id}/void`, { reason }),
 }
 

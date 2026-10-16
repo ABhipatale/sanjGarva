@@ -16,6 +16,7 @@ backend/    Laravel 12 REST API (Sanctum tokens) + PostgreSQL → deploy to any 
 | Store stock | Godown stock, add stock (purchase), value, low/out filters |
 | Store → Shop transfer | Never allows more than Store has; confirmation + full history |
 | Shop stock | Selling stock; only changes via transfer, sale, cancelled sale or adjustment |
+| Day closing | Owner types how many are **left** of each item at Shop or Store; sold = now − left is saved as one bill (revenue, profit, stock ledger). Draft survives reloads; cancelling the bill undoes it |
 | Adjustments | Physical count correction with reason (broken, missing…), logged |
 | Stock history | Every movement per product/location with running balance |
 | Products & categories | Marathi names, units (bottle/can/case/box/piece/peg), size, min stock, cost/selling price, live profit & margin |

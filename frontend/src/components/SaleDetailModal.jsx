@@ -64,6 +64,7 @@ export default function SaleDetailModal({ saleId, onClose }) {
           <div className="flex flex-wrap items-center gap-2 text-sm text-slate-600">
             <span>{formatDateTime(sale.sold_at)}</span>
             <PaymentBadge method={sale.payment_method} />
+            {sale.source === 'closing' && <Badge tone="brand">{t('closing.badge')} · {t(`stock.${sale.stock_location}`)}</Badge>}
             {sale.status === 'void' && <Badge tone="red">{t('sales.cancelled')}</Badge>}
           </div>
           {sale.customer && <p className="mt-2 text-[16px] font-semibold text-slate-800">{sale.customer.name} {sale.customer.mobile && <span className="font-normal text-slate-500">· {sale.customer.mobile}</span>}</p>}

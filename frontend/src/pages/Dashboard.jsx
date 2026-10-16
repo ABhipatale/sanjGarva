@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import {
-  ArrowRightLeft, Banknote, ChevronRight, HandCoins, PackagePlus, PackageX, Receipt, ShoppingCart, TrendingUp, TriangleAlert, UserPlus, Wallet, Wine,
+  ArrowRightLeft, Banknote, ChevronRight, ClipboardCheck, HandCoins, PackagePlus, PackageX, Receipt, ShoppingCart, TrendingUp, TriangleAlert, UserPlus, Wallet, Wine,
 } from 'lucide-react'
 import clsx from 'clsx'
 import { Card, CardHeader, StatCard } from '../components/ui/Card'
@@ -126,6 +126,19 @@ export default function Dashboard() {
             </Link>
           ))}
         </div>
+        <Link
+          to="/stock/closing"
+          className="mt-3 flex items-center gap-3 rounded-2xl bg-indigo-50 p-4 text-indigo-900 shadow-card ring-1 ring-indigo-200 transition active:scale-[0.99]"
+        >
+          <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-indigo-600 text-white">
+            <ClipboardCheck className="size-6" aria-hidden />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-[16px] font-extrabold">{t('closing.cardTitle')}</span>
+            <span className="block text-sm text-indigo-700">{t('closing.cardHint')}</span>
+          </span>
+          <ChevronRight className="size-5 shrink-0 text-indigo-400" aria-hidden />
+        </Link>
       </section>
 
       {/* Stock alerts */}

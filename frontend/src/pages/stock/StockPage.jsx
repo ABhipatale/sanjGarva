@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom'
 import { useQuery, keepPreviousData } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { ArrowRightLeft, Boxes, History, IndianRupee, PackagePlus, PackageX, SlidersHorizontal, TriangleAlert } from 'lucide-react'
+import { ArrowRightLeft, Boxes, ClipboardCheck, History, IndianRupee, PackagePlus, PackageX, SlidersHorizontal, TriangleAlert } from 'lucide-react'
 import Segmented from '../../components/ui/Segmented'
 import SearchInput from '../../components/ui/SearchInput'
 import Button from '../../components/ui/Button'
@@ -151,7 +151,8 @@ function StockList({ location }) {
         )}
       </QueryState>
 
-      <div className="flex justify-center gap-2 pt-2">
+      <div className="flex flex-wrap justify-center gap-2 pt-2">
+        <Button to="/stock/closing" variant="ghost" icon={ClipboardCheck}>{t('nav.closing')}</Button>
         <Button to="/stock/history" variant="ghost" icon={History}>{t('stock.history')}</Button>
         <Button to="/stock/adjust" variant="ghost" icon={SlidersHorizontal}>{t('stock.adjust')}</Button>
       </div>

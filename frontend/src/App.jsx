@@ -16,6 +16,7 @@ const AddStock = lazy(() => import('./pages/stock/AddStock'))
 const TransferStock = lazy(() => import('./pages/stock/TransferStock'))
 const AdjustStock = lazy(() => import('./pages/stock/AdjustStock'))
 const StockHistory = lazy(() => import('./pages/stock/StockHistory'))
+const ClosingStock = lazy(() => import('./pages/stock/ClosingStock'))
 const Products = lazy(() => import('./pages/products/Products'))
 const ProductForm = lazy(() => import('./pages/products/ProductForm'))
 const Customers = lazy(() => import('./pages/customers/Customers'))
@@ -63,6 +64,7 @@ export default function App() {
           <Route path="stock/transfer" element={<TransferStock />} />
           <Route path="stock/adjust" element={<AdjustStock />} />
           <Route path="stock/history" element={<StockHistory />} />
+          <Route path="stock/closing" element={<ClosingStock />} />
           <Route path="stock/:location" element={<StockPage />} />
           <Route path="products" element={<Products />} />
           <Route path="products/new" element={<ProductForm />} />

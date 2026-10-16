@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { BarChart3, Boxes, History, LogOut, Package, Receipt, Settings, SlidersHorizontal, Store, Wallet, ArrowRightLeft, PackagePlus } from 'lucide-react'
+import { BarChart3, Boxes, ClipboardCheck, History, LogOut, Package, Receipt, Settings, SlidersHorizontal, Store, Wallet, ArrowRightLeft, PackagePlus } from 'lucide-react'
 import LanguageToggle from '../components/LanguageToggle'
 import { useAuth } from '../context/AuthContext'
 import { useConfirm } from '../context/ConfirmContext'
@@ -8,6 +8,7 @@ import { useConfirm } from '../context/ConfirmContext'
 const LINKS = [
   { to: '/stock/store', icon: Boxes, key: 'nav.storeStock', tone: 'bg-brand-50 text-brand-700' },
   { to: '/stock/shop', icon: Store, key: 'nav.shopStock', tone: 'bg-sky-50 text-sky-700' },
+  { to: '/stock/closing', icon: ClipboardCheck, key: 'nav.closing', tone: 'bg-indigo-50 text-indigo-700' },
   { to: '/stock/add', icon: PackagePlus, key: 'quick.addStock', tone: 'bg-emerald-50 text-emerald-700' },
   { to: '/stock/transfer', icon: ArrowRightLeft, key: 'quick.transfer', tone: 'bg-sky-50 text-sky-700' },
   { to: '/sales', icon: Receipt, key: 'nav.salesHistory', tone: 'bg-amber-50 text-amber-700' },

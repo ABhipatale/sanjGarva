@@ -3,7 +3,7 @@ import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import clsx from 'clsx'
 import {
-  BarChart3, Boxes, Home, LayoutGrid, LogOut, Package, Receipt, Settings, ShoppingCart, Store, Users, Wallet, WifiOff, History,
+  BarChart3, Boxes, ClipboardCheck, Home, LayoutGrid, LogOut, Package, Receipt, Settings, ShoppingCart, Store, Users, Wallet, WifiOff, History,
 } from 'lucide-react'
 import Logo from '../components/Logo'
 import LanguageToggle from '../components/LanguageToggle'
@@ -20,6 +20,7 @@ const SIDEBAR = [
   { to: '/sales', icon: Receipt, key: 'nav.salesHistory', end: true },
   { to: '/stock/store', icon: Boxes, key: 'nav.storeStock' },
   { to: '/stock/shop', icon: Store, key: 'nav.shopStock' },
+  { to: '/stock/closing', icon: ClipboardCheck, key: 'nav.closing' },
   { to: '/stock/history', icon: History, key: 'nav.stockHistory' },
   { to: '/products', icon: Package, key: 'nav.products' },
   { to: '/customers', icon: Users, key: 'nav.customersUdhari' },

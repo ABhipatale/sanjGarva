@@ -7,6 +7,7 @@ use App\Models\Customer;
 use App\Models\Product;
 use App\Models\Sale;
 use App\Models\ShopStock;
+use App\Models\StoreStock;
 use App\Support\Money;
 use Illuminate\Support\Facades\DB;
 
@@ -22,8 +23,10 @@ class SaleService
      * write stock ledger rows and post udhari. Any failure rolls everything back.
      *
      * @param  array{items: array<int, array{product_id:int, quantity:int, unit_price?:numeric|null}>, payment_method:string, customer_id?:int|null, notes?:string|null}  $data
+     * @param  string  $location  store | shop — where the sold stock is taken from
+     * @param  string  $source  pos | closing
      */
-    public function create(array $data, ?int $userId): Sale
+    public function create(array $data, ?int $userId, string $location = 'shop', string $source = 'pos'): Sale
     {
         // Merge duplicate product lines (same product tapped twice).
         $lines = [];
@@ -34,11 +37,12 @@ class SaleService
         }
         ksort($lines);
 
-        return DB::transaction(function () use ($lines, $data, $userId) {
+        return DB::transaction(function () use ($lines, $data, $userId, $location, $source) {
             $ids = array_keys($lines);
-            // Lock products (stable avg_cost) and shop balances in id order.
+            // Lock products (stable avg_cost) and location balances in id order.
             $products = Product::whereIn('id', $ids)->orderBy('id')->lockForUpdate()->get()->keyBy('id');
-            $shop = ShopStock::whereIn('product_id', $ids)->orderBy('product_id')->lockForUpdate()->get()->keyBy('product_id');
+            $balanceModel = $location === 'store' ? StoreStock::class : ShopStock::class;
+            $balances = $balanceModel::whereIn('product_id', $ids)->orderBy('product_id')->lockForUpdate()->get()->keyBy('product_id');
 
             $items = [];
             $totalAmount = '0';
@@ -47,13 +51,13 @@ class SaleService
 
             foreach ($lines as $productId => $line) {
                 $product = $products[$productId];
-                $available = (int) ($shop[$productId]->quantity ?? 0);
+                $available = (int) ($balances[$productId]->quantity ?? 0);
 
                 if (! $product->is_active) {
                     throw new BusinessException('PRODUCT_INACTIVE', ['product' => $product->name, 'product_id' => $productId]);
                 }
                 if ($line['quantity'] > $available) {
-                    throw new BusinessException('INSUFFICIENT_STOCK', [
+                    throw new BusinessException($location === 'store' ? 'INSUFFICIENT_STORE_STOCK' : 'INSUFFICIENT_STOCK', [
                         'product' => $product->name,
                         'available' => $available,
                         'product_id' => $productId,
@@ -96,6 +100,8 @@ class SaleService
                 'sold_at' => now(),
                 'notes' => $data['notes'] ?? null,
                 'user_id' => $userId,
+                'source' => $source,
+                'stock_location' => $location,
             ]);
             $sale->invoice_no = sprintf('SG%06d', $sale->id);
             $sale->save();
@@ -103,7 +109,7 @@ class SaleService
             $sale->items()->createMany($items);
 
             foreach ($items as $item) {
-                $this->stock->move($item['product_id'], 'shop', -$item['quantity'], 'sale', $item['unit_cost'], 'sale', $sale->id, $sale->invoice_no, $userId);
+                $this->stock->move($item['product_id'], $location, -$item['quantity'], 'sale', $item['unit_cost'], 'sale', $sale->id, $sale->invoice_no, $userId);
             }
 
             if ($data['payment_method'] === 'udhari') {
@@ -115,7 +121,50 @@ class SaleService
     }
 
     /**
-     * Cancel a bill: return items to Shop at their original cost and reverse udhari.
+     * Day-end closing: the owner counts what is left at a location; everything missing since the
+     * last count is recorded as one sale (bill) at selling price. Remaining counts are compared with
+     * the locked balance, so a POS sale made while counting is never double-counted.
+     * Products whose count equals the balance are skipped. A wrong closing is undone by cancelling the bill.
+     *
+     * @param  array<int, array{product_id:int, remaining:int}>  $counts
+     */
+    public function closing(array $counts, string $location, string $paymentMethod, ?int $userId): Sale
+    {
+        $remaining = [];
+        foreach ($counts as $count) {
+            $remaining[(int) $count['product_id']] = (int) $count['remaining'];
+        }
+        ksort($remaining);
+
+        return DB::transaction(function () use ($remaining, $location, $paymentMethod, $userId) {
+            // Same lock order as create(): products first, then balances.
+            $products = Product::whereIn('id', array_keys($remaining))->orderBy('id')->lockForUpdate()->get()->keyBy('id');
+
+            $items = [];
+            foreach ($remaining as $productId => $left) {
+                $available = $this->stock->lockBalance($location, $productId)->quantity;
+                if ($left > $available) {
+                    throw new BusinessException('COUNT_MORE_THAN_STOCK', [
+                        'product' => $products[$productId]->name,
+                        'available' => $available,
+                        'product_id' => $productId,
+                    ]);
+                }
+                if ($left < $available) {
+                    $items[] = ['product_id' => $productId, 'quantity' => $available - $left];
+                }
+            }
+
+            if (! $items) {
+                throw new BusinessException('NOTHING_SOLD');
+            }
+
+            return $this->create(['items' => $items, 'payment_method' => $paymentMethod], $userId, $location, 'closing');
+        });
+    }
+
+    /**
+     * Cancel a bill: return items to the location they were sold from, at their original cost, and reverse udhari.
      */
     public function void(int $saleId, ?string $reason, ?int $userId): Sale
     {
@@ -130,7 +179,7 @@ class SaleService
                 $product = Product::whereKey($item->product_id)->lockForUpdate()->first();
                 $this->stock->receiveAtCost($product, $item->quantity, $item->unit_cost);
                 $product->save();
-                $this->stock->move($item->product_id, 'shop', $item->quantity, 'sale_void', $item->unit_cost, 'sale', $sale->id, $sale->invoice_no, $userId);
+                $this->stock->move($item->product_id, $sale->stock_location ?? 'shop', $item->quantity, 'sale_void', $item->unit_cost, 'sale', $sale->id, $sale->invoice_no, $userId);
             }
 
             if ($sale->payment_method === 'udhari' && $sale->customer_id) {

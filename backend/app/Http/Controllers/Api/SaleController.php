@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Concerns\RespondsWithJson;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ClosingRequest;
 use App\Http\Requests\SaleRequest;
 use App\Http\Resources\SaleResource;
 use App\Models\Sale;
@@ -49,6 +50,18 @@ class SaleController extends Controller
         $sale = $this->sales->create($request->validated(), $request->user()?->id);
 
         return $this->created(SaleResource::make($sale)->resolve(), __('messages.sale_saved'));
+    }
+
+    /** Day-end closing: remaining counts per product → one sale for everything sold. */
+    public function closing(ClosingRequest $request): JsonResponse
+    {
+        $data = $request->validated();
+        $sale = $this->sales->closing($data['counts'], $data['location'], $data['payment_method'], $request->user()?->id);
+
+        return $this->created(
+            SaleResource::make($sale)->resolve(),
+            __('messages.closing_saved', ['qty' => $sale->total_qty, 'amount' => $sale->total_amount]),
+        );
     }
 
     public function show(Sale $sale): JsonResponse

@@ -73,7 +73,15 @@ export default function SalesHistory() {
                 rows={d.data}
                 onRowClick={(s) => setSaleId(s.id)}
                 columns={[
-                  { key: 'invoice_no', header: t('sales.invoice'), render: (s) => <span className="font-semibold">{s.invoice_no}</span> },
+                  {
+                    key: 'invoice_no',
+                    header: t('sales.invoice'),
+                    render: (s) => (
+                      <span className="font-semibold">
+                        {s.invoice_no} {s.source === 'closing' && <Badge tone="brand">{t('closing.badge')}</Badge>}
+                      </span>
+                    ),
+                  },
                   { key: 'sold_at', header: t('common.date'), render: (s) => formatDateTime(s.sold_at) },
                   { key: 'customer', header: t('sales.customer'), render: (s) => s.customer?.name || <span className="text-slate-400">{t('sales.walkIn')}</span> },
                   { key: 'method', header: t('sales.paymentType'), render: (s) => (s.status === 'void' ? <Badge tone="red">{t('sales.cancelled')}</Badge> : <PaymentBadge method={s.payment_method} />) },
@@ -84,7 +92,9 @@ export default function SalesHistory() {
                 renderCard={(s) => (
                   <div className="flex items-center gap-3">
                     <div className="min-w-0 flex-1">
-                      <p className="truncate font-bold text-slate-900">{s.customer?.name || t('sales.walkIn')}</p>
+                      <p className="truncate font-bold text-slate-900">
+                        {s.source === 'closing' ? t('closing.cardTitle') : s.customer?.name || t('sales.walkIn')}
+                      </p>
                       <p className="text-sm text-slate-500">
                         {s.invoice_no} · {formatDateTime(s.sold_at)} · {t('sales.items', { count: s.total_qty })}
                       </p>
