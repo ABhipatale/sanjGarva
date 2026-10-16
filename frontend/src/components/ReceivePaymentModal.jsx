@@ -10,8 +10,9 @@ import { customerApi } from '../services/endpoints'
 import { fieldErrors } from '../services/api'
 import { useToast } from '../context/ToastContext'
 import { useConfirm } from '../context/ConfirmContext'
-import { useInvalidateBusiness } from '../hooks/queries'
-import { isoDate, money, toNumber } from '../utils/format'
+import { useInvalidateBusiness, useSettings } from '../hooks/queries'
+import { useWhatsApp } from '../context/WhatsAppContext'
+import { formatDate, isoDate, localName, money, toNumber } from '../utils/format'
 
 const METHODS = ['cash', 'upi', 'card', 'bank', 'other']
 
@@ -23,6 +24,8 @@ export default function ReceivePaymentModal({ open, onClose, customer: fixedCust
   const toast = useToast()
   const confirm = useConfirm()
   const invalidate = useInvalidateBusiness()
+  const offerWhatsApp = useWhatsApp()
+  const { data: settings } = useSettings()
   const [customer, setCustomer] = useState(fixedCustomer || null)
   const [amount, setAmount] = useState('')
   const [date, setDate] = useState(isoDate())
@@ -46,11 +49,22 @@ export default function ReceivePaymentModal({ open, onClose, customer: fixedCust
 
   const mutation = useMutation({
     mutationFn: () => customerApi.payment(customer.id, { amount: value, payment_date: date, payment_method: method, notes: notes || null }),
-    onSuccess: () => {
+    onSuccess: (res) => {
       toast.success(t('customers.paymentSuccess', { amount: money(value), name: customer.name }))
       invalidate()
       onDone?.()
       onClose()
+      offerWhatsApp({
+        name: customer.name,
+        mobile: customer.mobile,
+        message: t('whatsapp.paymentReceived', {
+          name: customer.name,
+          bar: localName(settings, 'bar_name') || t('app.name'),
+          amount: money(value),
+          date: formatDate(date),
+          balance: money(res.data.balance),
+        }),
+      })
     },
     onError: (err) => !err.errors && toast.error(err.message),
   })

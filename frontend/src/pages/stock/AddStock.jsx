@@ -16,10 +16,11 @@ import { stockApi, supplierApi } from '../../services/endpoints'
 import { fieldErrors } from '../../services/api'
 import { useToast } from '../../context/ToastContext'
 import { useConfirm } from '../../context/ConfirmContext'
-import { useInvalidateBusiness } from '../../hooks/queries'
+import { useInvalidateBusiness, useSettings } from '../../hooks/queries'
+import { useWhatsApp } from '../../context/WhatsAppContext'
 import { usePresetProduct } from '../../hooks/usePresetProduct'
 import { storage } from '../../utils/storage'
-import { isoDate, localName, money, num, toNumber } from '../../utils/format'
+import { formatDate, isoDate, localName, money, num, toNumber } from '../../utils/format'
 
 const PAY_MODE_KEY = 'add-stock-pay-mode'
 
@@ -32,6 +33,8 @@ export default function AddStock() {
   const toast = useToast()
   const confirm = useConfirm()
   const invalidate = useInvalidateBusiness()
+  const offerWhatsApp = useWhatsApp()
+  const { data: settings } = useSettings()
   const [params] = useSearchParams()
 
   // Bill
@@ -119,7 +122,24 @@ export default function AddStock() {
         : t('stock.billSuccess', { count: allLines.length, qty: num(billQty) }))
       invalidate()
       // Keep the supplier and date: the owner may have another bill from the same delivery.
-      if (supplier) setSupplier({ ...supplier, balance: toNumber(supplier.balance) + unpaid })
+      if (supplier) {
+        const balance = toNumber(supplier.balance) + unpaid
+        setSupplier({ ...supplier, balance })
+        offerWhatsApp({
+          name: supplier.name,
+          mobile: supplier.mobile,
+          message: t('whatsapp.supplierBill', {
+            name: supplier.name,
+            bar: localName(settings, 'bar_name') || t('app.name'),
+            date: formatDate(date),
+            items: allLines.map((l) => `• ${localName(l.product)} × ${num(l.qty)} = ${money(l.qty * toNumber(l.cost))}`).join('\n'),
+            total: money(billTotal),
+            paid: money(paid),
+            unpaid: money(unpaid),
+            balance: money(balance),
+          }),
+        })
+      }
       setLines([])
       clearEditor()
       setPartPaid('')

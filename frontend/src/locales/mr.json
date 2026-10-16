@@ -532,5 +532,18 @@
     "NOTHING_SOLD": "काहीही विकले नाही: सर्व संख्या सध्याच्या स्टॉकएवढीच आहे.",
     "SUPPLIER_PAYMENT_EXCEEDS_BALANCE": "रक्कम बाकी ({{balance}}) पेक्षा जास्त आहे.",
     "PAID_MORE_THAN_BILL": "दिलेली रक्कम बिलाच्या एकूण ({{total}}) पेक्षा जास्त असू शकत नाही."
+  },
+  "whatsapp": {
+    "title": "{{name}} यांना WhatsApp पाठवायचा?",
+    "send": "WhatsApp पाठवा",
+    "skip": "नको",
+    "message": "संदेश",
+    "noMobile": "मोबाईल नंबर जतन नाही — WhatsApp कोणाला पाठवायचे ते विचारेल.",
+    "supplierBill": "नमस्कार {{name}},\n{{bar}} ला {{date}} रोजी माल मिळाला:\n{{items}}\n\nबिल एकूण: {{total}}\nआता दिले: {{paid}}\nया बिलावर बाकी: {{unpaid}}\nतुमची एकूण बाकी: {{balance}}\n\nधन्यवाद.",
+    "supplierPayment": "नमस्कार {{name}},\n{{bar}} कडून {{date}} रोजी {{amount}} दिले ({{method}}).\nउरलेली बाकी: {{balance}}\n\nधन्यवाद.",
+    "supplierStatement": "नमस्कार {{name}},\n{{bar}} चा हिशोब:\nएकूण खरेदी: {{total}}\nदिले: {{paid}}\nउरलेली बाकी: {{balance}}\n\nधन्यवाद.",
+    "udhariAdded": "नमस्कार {{name}},\n{{bar}} येथे {{date}} रोजी {{amount}} उधारी जोडली.{{note}}\nएकूण बाकी उधारी: {{balance}}\n\nधन्यवाद.",
+    "paymentReceived": "नमस्कार {{name}},\n{{bar}} ला {{date}} रोजी तुमच्याकडून {{amount}} मिळाले. धन्यवाद!\nउरलेली उधारी: {{balance}}",
+    "noteLine": "\nकशासाठी: {{note}}"
   }
 }

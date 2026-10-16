@@ -532,5 +532,18 @@
     "NOTHING_SOLD": "Nothing sold: every count is the same as current stock.",
     "SUPPLIER_PAYMENT_EXCEEDS_BALANCE": "Amount is more than unpaid balance ({{balance}}).",
     "PAID_MORE_THAN_BILL": "Paid amount cannot be more than the bill total ({{total}})."
+  },
+  "whatsapp": {
+    "title": "Send to {{name}} on WhatsApp?",
+    "send": "Send on WhatsApp",
+    "skip": "Skip",
+    "message": "Message",
+    "noMobile": "No mobile number saved — WhatsApp will ask which chat to send to.",
+    "supplierBill": "Namaskar {{name}},\n{{bar}} received stock on {{date}}:\n{{items}}\n\nBill total: {{total}}\nPaid now: {{paid}}\nUnpaid on this bill: {{unpaid}}\nTotal unpaid to you: {{balance}}\n\nThank you.",
+    "supplierPayment": "Namaskar {{name}},\n{{bar}} paid you {{amount}} on {{date}} ({{method}}).\nRemaining unpaid: {{balance}}\n\nThank you.",
+    "supplierStatement": "Namaskar {{name}},\nAccount of {{bar}}:\nTotal purchase: {{total}}\nPaid: {{paid}}\nRemaining unpaid: {{balance}}\n\nThank you.",
+    "udhariAdded": "Namaskar {{name}},\n{{amount}} udhari added at {{bar}} on {{date}}.{{note}}\nTotal udhari due: {{balance}}\n\nThank you.",
+    "paymentReceived": "Namaskar {{name}},\n{{bar}} received {{amount}} from you on {{date}}. Thank you!\nRemaining udhari: {{balance}}",
+    "noteLine": "\nFor: {{note}}"
   }
 }

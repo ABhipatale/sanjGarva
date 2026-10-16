@@ -10,8 +10,9 @@ import { customerApi } from '../services/endpoints'
 import { fieldErrors } from '../services/api'
 import { useToast } from '../context/ToastContext'
 import { useConfirm } from '../context/ConfirmContext'
-import { useInvalidateBusiness } from '../hooks/queries'
-import { isoDate, money, toNumber } from '../utils/format'
+import { useInvalidateBusiness, useSettings } from '../hooks/queries'
+import { useWhatsApp } from '../context/WhatsAppContext'
+import { formatDate, isoDate, localName, money, toNumber } from '../utils/format'
 
 /**
  * Add udhari directly to a customer's khata — just an amount, no products or stock.
@@ -22,6 +23,8 @@ export default function AddUdhariModal({ open, onClose, customer: fixedCustomer,
   const toast = useToast()
   const confirm = useConfirm()
   const invalidate = useInvalidateBusiness()
+  const offerWhatsApp = useWhatsApp()
+  const { data: settings } = useSettings()
   const [customer, setCustomer] = useState(fixedCustomer || null)
   const [amount, setAmount] = useState('')
   const [date, setDate] = useState(isoDate())
@@ -41,11 +44,23 @@ export default function AddUdhariModal({ open, onClose, customer: fixedCustomer,
 
   const mutation = useMutation({
     mutationFn: () => customerApi.udhari(customer.id, { amount: value, udhari_date: date, notes: notes || null }),
-    onSuccess: () => {
+    onSuccess: (res) => {
       toast.success(t('customers.udhariSuccess', { amount: money(value), name: customer.name }))
       invalidate()
       onDone?.()
       onClose()
+      offerWhatsApp({
+        name: customer.name,
+        mobile: customer.mobile,
+        message: t('whatsapp.udhariAdded', {
+          name: customer.name,
+          bar: localName(settings, 'bar_name') || t('app.name'),
+          amount: money(value),
+          date: formatDate(date),
+          note: notes ? t('whatsapp.noteLine', { note: notes }) : '',
+          balance: money(res.data.balance),
+        }),
+      })
     },
     onError: (err) => !err.errors && toast.error(err.message),
   })

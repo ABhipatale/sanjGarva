@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { Banknote, PackagePlus, Pencil, Phone, Trash2, Truck } from 'lucide-react'
+import { Banknote, MessageCircle, PackagePlus, Pencil, Phone, Trash2, Truck } from 'lucide-react'
 import clsx from 'clsx'
 import PageHeader from '../../components/ui/PageHeader'
 import Button from '../../components/ui/Button'
@@ -11,7 +11,8 @@ import { EmptyState, ErrorState, PageLoader, QueryState } from '../../components
 import SupplierFormModal from '../../components/SupplierFormModal'
 import PaySupplierModal from '../../components/PaySupplierModal'
 import { supplierApi } from '../../services/endpoints'
-import { useInvalidateBusiness } from '../../hooks/queries'
+import { useInvalidateBusiness, useSettings } from '../../hooks/queries'
+import { useWhatsApp } from '../../context/WhatsAppContext'
 import { useToast } from '../../context/ToastContext'
 import { useConfirm } from '../../context/ConfirmContext'
 import { formatDate, localName, money, num, toNumber } from '../../utils/format'
@@ -23,6 +24,8 @@ export default function SupplierDetail() {
   const toast = useToast()
   const confirm = useConfirm()
   const invalidate = useInvalidateBusiness()
+  const offerWhatsApp = useWhatsApp()
+  const { data: settings } = useSettings()
   const [editing, setEditing] = useState(false)
   const [paying, setPaying] = useState(false)
 
@@ -48,6 +51,19 @@ export default function SupplierDetail() {
     if (await confirm({ title: t('suppliers.deleteConfirm', { name: s.name }), danger: true, confirmText: t('common.delete') })) remove.mutate()
   }
 
+  const sendStatement = () =>
+    offerWhatsApp({
+      name: s.name,
+      mobile: s.mobile,
+      message: t('whatsapp.supplierStatement', {
+        name: s.name,
+        bar: localName(settings, 'bar_name') || t('app.name'),
+        total: money(s.total_purchase),
+        paid: money(s.total_paid),
+        balance: money(s.balance),
+      }),
+    })
+
   const describe = (e) => {
     if (e.type === 'purchase' && e.product) return `${localName(e.product)} × ${num(e.quantity)}`
     if (e.type === 'payment') return [t('suppliers.types.payment'), e.payment_method && t(`payment.${e.payment_method}`)].filter(Boolean).join(' · ')
@@ -62,6 +78,7 @@ export default function SupplierDetail() {
         back="/suppliers"
         actions={
           <>
+            <Button variant="secondary" size="icon" icon={MessageCircle} onClick={sendStatement} aria-label={t('customers.whatsapp')} className="text-emerald-600" />
             {s.mobile && <Button variant="secondary" size="icon" icon={Phone} onClick={() => (window.location.href = `tel:${s.mobile}`)} aria-label={t('customers.callCustomer')} />}
             <Button variant="secondary" size="icon" icon={Pencil} onClick={() => setEditing(true)} aria-label={t('common.edit')} />
             <Button variant="secondary" size="icon" icon={Trash2} onClick={onDelete} loading={remove.isPending} aria-label={t('common.delete')} className="text-rose-600" />
