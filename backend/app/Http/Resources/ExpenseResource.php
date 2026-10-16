@@ -18,6 +18,7 @@ class ExpenseResource extends JsonResource
                 'id' => $this->category->id,
                 'name' => $this->category->name,
                 'name_mr' => $this->category->name_mr,
+                'kind' => $this->category->kind ?? 'bar',
             ]),
             'amount' => $this->amount,
             'expense_date' => $this->expense_date?->toDateString(),

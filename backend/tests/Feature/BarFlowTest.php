@@ -166,7 +166,7 @@ class BarFlowTest extends TestCase
         $p = $this->product(['opening_shop' => 10]);
         $this->postJson('/api/sales', ['items' => [['product_id' => $p['id'], 'quantity' => 5]], 'payment_method' => 'cash'])->assertCreated();
         $this->postJson('/api/expenses', [
-            'expense_category_id' => ExpenseCategory::first()->id, 'amount' => 50, 'expense_date' => now()->toDateString(),
+            'expense_category_id' => ExpenseCategory::where('kind', 'bar')->first()->id, 'amount' => 50, 'expense_date' => now()->toDateString(),
         ])->assertCreated();
 
         $d = $this->getJson('/api/dashboard')->assertOk()->json('data.today');
@@ -176,6 +176,32 @@ class BarFlowTest extends TestCase
         $this->assertSame('50.00', $d['expenses']);
         $this->assertSame('200.00', $d['net_profit']);
         $this->assertSame('750.00', $d['cash']);
+    }
+
+    public function test_home_expenses_do_not_reduce_business_profit(): void
+    {
+        $p = $this->product(['opening_store' => 0, 'opening_shop' => 10]); // cost 100, sell 150
+        $this->postJson('/api/sales', ['items' => [['product_id' => $p['id'], 'quantity' => 4]], 'payment_method' => 'cash'])->assertCreated();
+
+        $today = now()->toDateString();
+        $bar = ExpenseCategory::where('kind', 'bar')->first();
+        $home = ExpenseCategory::where('kind', 'home')->first();
+        $this->postJson('/api/expenses', ['expense_category_id' => $bar->id, 'amount' => 50, 'expense_date' => $today])->assertCreated();
+        $this->postJson('/api/expenses', ['expense_category_id' => $home->id, 'amount' => 120, 'expense_date' => $today])
+            ->assertCreated()->assertJsonPath('data.category.kind', 'home');
+
+        // Business P&L, dashboard, expense report and bar list: only the bar expense (gross 200 − 50).
+        $this->getJson('/api/reports/profit-loss?period=today')->assertJsonPath('data.expenses', '50.00')->assertJsonPath('data.net_profit', '150.00');
+        $this->getJson('/api/dashboard')->assertJsonPath('data.today.expenses', '50.00')->assertJsonPath('data.today.net_profit', '150.00');
+        $this->getJson('/api/reports/expenses?period=today')->assertJsonPath('data.total', '50.00');
+        $this->getJson('/api/expenses?period=today')->assertJsonCount(1, 'data')->assertJsonPath('meta.summary.total', '50.00');
+
+        // Home section: its own list, and profit left after home spending (150 − 120).
+        $this->getJson('/api/expenses?kind=home&period=today')
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('meta.summary.total', '120.00')
+            ->assertJsonPath('meta.summary.bar_net_profit', '150.00')
+            ->assertJsonPath('meta.summary.after_home', '30.00');
     }
 
     public function test_void_sale_restores_stock_and_udhari(): void

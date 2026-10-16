@@ -386,7 +386,16 @@
     "empty": "No expenses in this period.",
     "addFirst": "+ Add Expense",
     "total": "Total Expenses",
-    "byCategory": "By Category"
+    "byCategory": "By Category",
+    "barTab": "Bar Expenses",
+    "homeTab": "Home Expenses",
+    "homeTotal": "Total Home Expenses",
+    "addHome": "Add Home Expense",
+    "emptyHome": "No home expenses in this period.",
+    "barProfit": "Bar profit (after bar expenses)",
+    "lessHome": "Home expenses",
+    "afterHome": "Left after home expenses",
+    "homeNote": "Home expenses stay only here. They are not deducted from bar profit, Dashboard or Reports."
   },
   "reports": {
     "title": "Reports",

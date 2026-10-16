@@ -7,8 +7,10 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\ExpenseRequest;
 use App\Http\Resources\ExpenseResource;
 use App\Models\Expense;
+use App\Models\ExpenseCategory;
 use App\Services\ReportService;
 use App\Support\DateRange;
+use App\Support\Money;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -18,24 +20,36 @@ class ExpenseController extends Controller
 
     public function __construct(private readonly ReportService $reports) {}
 
-    /** ?period=&from=&to=&category_id= */
+    /** ?kind=bar|home&period=&from=&to=&category_id= */
     public function index(Request $request): JsonResponse
     {
         $range = DateRange::fromRequest($request, 'month');
+        $kind = in_array($request->query('kind'), ExpenseCategory::KINDS, true) ? $request->query('kind') : 'bar';
 
-        $expenses = Expense::with('category:id,name,name_mr')
+        $expenses = Expense::with('category:id,name,name_mr,kind')
+            ->ofKind($kind)
             ->when($range->from, fn ($q) => $q->where('expense_date', '>=', $range->from->toDateString()))
             ->when($range->to, fn ($q) => $q->where('expense_date', '<=', $range->to->toDateString()))
             ->when($request->filled('category_id'), fn ($q) => $q->where('expense_category_id', $request->integer('category_id')))
             ->orderByDesc('expense_date')->orderByDesc('id')
             ->paginate($this->perPage());
 
+        $summary = [
+            'kind' => $kind,
+            'total' => $this->reports->expenseTotal($range, $kind),
+            'by_category' => $this->reports->expensesByCategory($range, $kind),
+        ];
+
+        if ($kind === 'home') {
+            // Shown only here: what is left of the bar's net profit after household spending.
+            $netProfit = $this->reports->profitLoss($range)['net_profit'];
+            $summary['bar_net_profit'] = $netProfit;
+            $summary['after_home'] = Money::round(Money::sub($netProfit, $summary['total']), 2);
+        }
+
         return $this->paginated($expenses, ExpenseResource::class, [
             'range' => $range->toArray(),
-            'summary' => [
-                'total' => $this->reports->expenseTotal($range),
-                'by_category' => $this->reports->expensesByCategory($range),
-            ],
+            'summary' => $summary,
         ]);
     }
 

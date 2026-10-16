@@ -133,7 +133,7 @@ class DemoSeeder extends Seeder
         foreach ($expenses as [$description, $category, $amount]) {
             Expense::firstOrCreate(
                 ['description' => $description, 'expense_date' => now()->toDateString()],
-                ['expense_category_id' => ExpenseCategory::where('name', $category)->value('id'), 'amount' => $amount, 'payment_method' => 'cash', 'user_id' => $userId],
+                ['expense_category_id' => ExpenseCategory::where('kind', 'bar')->where('name', $category)->value('id'), 'amount' => $amount, 'payment_method' => 'cash', 'user_id' => $userId],
             );
         }
     }

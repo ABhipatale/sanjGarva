@@ -40,7 +40,10 @@ class DatabaseSeeder extends Seeder
             ['Ice', 'बर्फ'], ['Other', 'इतर'],
         ];
         foreach ($expenseCategories as $i => [$name, $mr]) {
-            ExpenseCategory::firstOrCreate(['name' => $name], ['name_mr' => $mr, 'sort_order' => $i]);
+            ExpenseCategory::firstOrCreate(['name' => $name, 'kind' => 'bar'], ['name_mr' => $mr, 'sort_order' => $i]);
+        }
+        foreach (ExpenseCategory::HOME_DEFAULTS as $i => [$name, $mr]) {
+            ExpenseCategory::firstOrCreate(['name' => $name, 'kind' => 'home'], ['name_mr' => $mr, 'sort_order' => 100 + $i]);
         }
 
         app(SettingsService::class)->update(array_merge(

@@ -91,7 +91,7 @@ class ExportController extends Controller
 
             case 'expenses':
                 fputcsv($out, ['Date', 'Category', 'Amount', 'Payment Method', 'Description']);
-                $between(Expense::with('category:id,name'), 'expense_date', true)->orderBy('expense_date')->orderBy('id')
+                $between(Expense::ofKind('bar')->with('category:id,name'), 'expense_date', true)->orderBy('expense_date')->orderBy('id')
                     ->chunk(500, function ($rows) use ($out) {
                         foreach ($rows as $e) {
                             fputcsv($out, [$e->expense_date->toDateString(), $e->category?->name, $e->amount, $e->payment_method, $e->description]);

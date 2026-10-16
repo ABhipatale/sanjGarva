@@ -16,13 +16,15 @@ import { isoDate, localName, money } from '../utils/format'
 
 const METHODS = ['cash', 'upi', 'bank', 'other']
 
-export default function ExpenseFormModal({ open, onClose, expense }) {
+export default function ExpenseFormModal({ open, onClose, expense, kind: listKind = 'bar' }) {
   const { t } = useTranslation()
   const toast = useToast()
   const confirm = useConfirm()
   const invalidate = useInvalidateBusiness()
   const { data: categories = [] } = useExpenseCategories()
   const editing = !!expense
+  // Bar and home expenses use separate categories; the category decides whether it counts in profit.
+  const kind = expense?.category?.kind || listKind
 
   const [form, setForm] = useState({})
   useEffect(() => {
@@ -66,7 +68,7 @@ export default function ExpenseFormModal({ open, onClose, expense }) {
     <Modal
       open={open}
       onClose={onClose}
-      title={editing ? t('expenses.edit') : t('expenses.add')}
+      title={editing ? t('expenses.edit') : kind === 'home' ? t('expenses.addHome') : t('expenses.add')}
       footer={
         <div className="flex gap-3">
           {editing && <Button variant="secondary" size="lg" icon={Trash2} onClick={onDelete} loading={remove.isPending} aria-label={t('common.delete')} className="text-rose-600" />}
@@ -80,7 +82,7 @@ export default function ExpenseFormModal({ open, onClose, expense }) {
         <div>
           <p className="mb-2 text-[15px] font-semibold text-slate-700">{t('expenses.category')}</p>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-            {categories.filter((c) => c.is_active || c.id === form.expense_category_id).map((c) => (
+            {categories.filter((c) => (c.kind || 'bar') === kind && (c.is_active || c.id === form.expense_category_id)).map((c) => (
               <button
                 key={c.id}
                 type="button"

@@ -109,14 +109,15 @@ class ReportService
             ->all();
     }
 
-    public function expenseTotal(DateRange $range): string
+    /** Bar expenses by default: home expenses never reduce the business profit. */
+    public function expenseTotal(DateRange $range, string $kind = 'bar'): string
     {
-        return Money::round($this->expenseQuery($range)->sum('amount'), 2);
+        return Money::round($this->expenseQuery($range, $kind)->sum('amount'), 2);
     }
 
-    public function expensesByCategory(DateRange $range): array
+    public function expensesByCategory(DateRange $range, string $kind = 'bar'): array
     {
-        return $this->expenseQuery($range)
+        return $this->expenseQuery($range, $kind)
             ->join('expense_categories', 'expense_categories.id', '=', 'expenses.expense_category_id')
             ->groupBy('expense_categories.id', 'expense_categories.name', 'expense_categories.name_mr')
             ->select('expense_categories.id', 'expense_categories.name', 'expense_categories.name_mr')
@@ -359,9 +360,10 @@ class ReportService
             ->when($range->to, fn ($q) => $q->where('sold_at', '<=', $range->to));
     }
 
-    private function expenseQuery(DateRange $range): Builder
+    private function expenseQuery(DateRange $range, string $kind = 'bar'): Builder
     {
         return Expense::query()
+            ->ofKind($kind)
             ->when($range->from, fn ($q) => $q->where('expense_date', '>=', $range->from->toDateString()))
             ->when($range->to, fn ($q) => $q->where('expense_date', '<=', $range->to->toDateString()));
     }
