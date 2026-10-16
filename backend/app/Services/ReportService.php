@@ -239,7 +239,7 @@ class ReportService
         $period = CustomerTransaction::query()
             ->when($range->from, fn ($q) => $q->where('transaction_date', '>=', $range->from))
             ->when($range->to, fn ($q) => $q->where('transaction_date', '<=', $range->to))
-            ->selectRaw("COALESCE(SUM(CASE WHEN type = 'sale' THEN debit ELSE 0 END), 0) AS given")
+            ->selectRaw("COALESCE(SUM(CASE WHEN type IN ('sale', 'manual') THEN debit ELSE 0 END), 0) AS given")
             ->selectRaw("COALESCE(SUM(CASE WHEN type = 'payment' THEN credit ELSE 0 END), 0) AS received")
             ->toBase()->first();
 

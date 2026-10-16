@@ -365,7 +365,16 @@
     "noLedger": "अजून व्यवहार नाहीत.",
     "callCustomer": "फोन",
     "whatsapp": "WhatsApp",
-    "shareText": "नमस्कार {{name}}, {{bar}} येथे तुमची बाकी उधारी {{amount}} आहे. धन्यवाद."
+    "shareText": "नमस्कार {{name}}, {{bar}} येथे तुमची बाकी उधारी {{amount}} आहे. धन्यवाद.",
+    "addUdhari": "उधारी जोडा",
+    "udhariAmount": "उधारी रक्कम",
+    "whatFor": "कशासाठी? (उदा. रोख उसने, जुनी बाकी)",
+    "afterUdhari": "जोडल्यानंतर एकूण बाकी",
+    "udhariConfirm": "{{name}} यांच्या खात्यात {{amount}} उधारी जोडायची?",
+    "udhariSuccess": "{{name}} यांच्या खात्यात {{amount}} उधारी जोडली.",
+    "directUdhari": "थेट उधारी",
+    "udhariHint": "फक्त ग्राहकाचे खाते बदलते. कोणताही माल, स्टॉक किंवा विक्री वापरली जात नाही.",
+    "withProducts": "मालासह उधारी विक्री"
   },
   "payment": {
     "cash": "रोख",

@@ -29,4 +29,5 @@ return [
     'sale_voided' => 'Bill cancelled.',
     'closing_saved' => 'Day closing saved: :qty sold for :amount.',
     'payment_received' => 'Payment received.',
+    'udhari_added' => 'Udhari added.',
 ];

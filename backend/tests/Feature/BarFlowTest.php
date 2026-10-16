@@ -132,6 +132,32 @@ class BarFlowTest extends TestCase
         $this->assertSame('300.00', $ledger['customer']['balance']);
     }
 
+    public function test_direct_udhari_without_products(): void
+    {
+        $c = $this->postJson('/api/customers', ['name' => 'Ramesh', 'opening_balance' => 100])->assertCreated()->json('data');
+
+        $this->postJson("/api/customers/{$c['id']}/udhari", ['amount' => 250, 'notes' => 'Cash loan'])
+            ->assertCreated()
+            ->assertJsonPath('data.amount', '250.00')
+            ->assertJsonPath('data.balance', '350.00');
+
+        $this->postJson("/api/customers/{$c['id']}/udhari", ['amount' => 0])->assertStatus(422);
+
+        // Khata only: no sale, no revenue, stock untouched.
+        $this->assertSame(0, Sale::count());
+        $this->getJson('/api/reports/profit-loss?period=today')->assertJsonPath('data.revenue', '0.00');
+        $this->getJson('/api/reports/udhari?period=today')->assertJsonPath('data.udhari_given', '250.00');
+
+        $ledger = $this->getJson("/api/customers/{$c['id']}/ledger")->assertOk()->json('data');
+        $this->assertSame('manual', $ledger['entries'][1]['type']);
+        $this->assertSame('Cash loan', $ledger['entries'][1]['notes']);
+        $this->assertSame('350.00', $ledger['closing_balance']);
+
+        // And it can be paid back like any other udhari.
+        $this->postJson("/api/customers/{$c['id']}/payment", ['amount' => 350, 'payment_method' => 'cash'])
+            ->assertCreated()->assertJsonPath('data.balance', '0.00');
+    }
+
     public function test_weighted_average_cost_and_historical_profit(): void
     {
         $p = $this->product(['opening_store' => 10, 'opening_shop' => 0, 'cost_price' => 100]);

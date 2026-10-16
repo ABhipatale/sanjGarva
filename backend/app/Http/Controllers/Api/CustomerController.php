@@ -7,6 +7,7 @@ use App\Http\Controllers\Concerns\RespondsWithJson;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CustomerRequest;
 use App\Http\Requests\PaymentRequest;
+use App\Http\Requests\UdhariRequest;
 use App\Http\Resources\CustomerResource;
 use App\Models\Customer;
 use App\Services\CustomerLedgerService;
@@ -100,6 +101,19 @@ class CustomerController extends Controller
             'balance' => $tx->balance_after,
             'customer' => $this->present($customer->id),
         ], __('messages.payment_received'));
+    }
+
+    /** Add udhari directly to the khata, without selecting products. */
+    public function udhari(UdhariRequest $request, Customer $customer): JsonResponse
+    {
+        $tx = $this->ledger->addUdhari($customer->id, $request->validated(), $request->user()?->id);
+
+        return $this->created([
+            'transaction_id' => $tx->id,
+            'amount' => $tx->debit,
+            'balance' => $tx->balance_after,
+            'customer' => $this->present($customer->id),
+        ], __('messages.udhari_added'));
     }
 
     private function present(int $id): array

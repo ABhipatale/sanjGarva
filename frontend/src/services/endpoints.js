@@ -62,6 +62,7 @@ export const customerApi = {
   remove: (id) => api.delete(`/customers/${id}`),
   ledger: (id, params) => api.get(`/customers/${id}/ledger`, params),
   payment: (id, data) => api.post(`/customers/${id}/payment`, data),
+  udhari: (id, data) => api.post(`/customers/${id}/udhari`, data),
 }
 
 export const expenseApi = {

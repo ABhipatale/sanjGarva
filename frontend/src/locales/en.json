@@ -365,7 +365,16 @@
     "noLedger": "No transactions yet.",
     "callCustomer": "Call",
     "whatsapp": "WhatsApp",
-    "shareText": "Namaskar {{name}}, your pending udhari at {{bar}} is {{amount}}. Thank you."
+    "shareText": "Namaskar {{name}}, your pending udhari at {{bar}} is {{amount}}. Thank you.",
+    "addUdhari": "Add Udhari",
+    "udhariAmount": "Udhari amount",
+    "whatFor": "What for? (e.g. cash loan, old dues)",
+    "afterUdhari": "Total due after adding",
+    "udhariConfirm": "Add {{amount}} udhari to {{name}}?",
+    "udhariSuccess": "{{amount}} udhari added to {{name}}.",
+    "directUdhari": "Udhari (direct)",
+    "udhariHint": "Only the customer’s khata changes. No product, stock or sale is used.",
+    "withProducts": "Udhari Sale (with products)"
   },
   "payment": {
     "cash": "Cash",

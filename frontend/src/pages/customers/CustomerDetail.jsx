@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { FileDown, HandCoins, MessageCircle, Pencil, Phone, Printer, Share2, ShoppingCart, Trash2 } from 'lucide-react'
+import { BookPlus, FileDown, HandCoins, MessageCircle, Pencil, Phone, Printer, Share2, ShoppingCart, Trash2 } from 'lucide-react'
 import clsx from 'clsx'
 import PageHeader from '../../components/ui/PageHeader'
 import Button from '../../components/ui/Button'
@@ -12,6 +12,7 @@ import { Card } from '../../components/ui/Card'
 import { EmptyState, ErrorState, PageLoader, QueryState } from '../../components/ui/States'
 import CustomerFormModal from '../../components/CustomerFormModal'
 import ReceivePaymentModal from '../../components/ReceivePaymentModal'
+import AddUdhariModal from '../../components/AddUdhariModal'
 import SaleDetailModal from '../../components/SaleDetailModal'
 import { customerApi } from '../../services/endpoints'
 import { useCustomer, useInvalidateBusiness, useSettings } from '../../hooks/queries'
@@ -30,6 +31,7 @@ export default function CustomerDetail() {
   const [period, setPeriod] = useState({ period: 'all' })
   const [editing, setEditing] = useState(false)
   const [paying, setPaying] = useState(false)
+  const [giving, setGiving] = useState(false)
   const [saleId, setSaleId] = useState(null)
 
   const customerQuery = useCustomer(id)
@@ -70,7 +72,7 @@ export default function CustomerDetail() {
   }
 
   const typeLabel = (e) =>
-    ({ opening: t('customers.openingRow'), sale: t('customers.purchase'), payment: t('customers.payment'), sale_void: t('customers.saleVoid') })[e.type] || e.type
+    ({ opening: t('customers.openingRow'), sale: t('customers.purchase'), payment: t('customers.payment'), sale_void: t('customers.saleVoid'), manual: t('customers.directUdhari') })[e.type] || e.type
 
   return (
     <div className="space-y-4">
@@ -133,11 +135,14 @@ export default function CustomerDetail() {
       </Card>
 
       <div className="grid grid-cols-2 gap-3 no-print">
+        <Button size="lg" variant="gold" icon={BookPlus} onClick={() => setGiving(true)}>
+          {t('customers.addUdhari')}
+        </Button>
         <Button size="lg" variant="success" icon={HandCoins} onClick={() => setPaying(true)} disabled={due <= 0}>
           {t('customers.receivePayment')}
         </Button>
-        <Button size="lg" variant="gold" icon={ShoppingCart} to={`/sales/new?customer=${c.id}`}>
-          {t('sales.udhari')} {t('nav.sales')}
+        <Button size="lg" variant="soft" icon={ShoppingCart} to={`/sales/new?customer=${c.id}`} className="col-span-2">
+          {t('customers.withProducts')}
         </Button>
       </div>
 
@@ -171,6 +176,7 @@ export default function CustomerDetail() {
                       <b>{typeLabel(e)}</b>
                       {e.invoice_no && <span className="text-slate-500"> · {e.invoice_no}</span>}
                       {e.payment_method && <span className="text-slate-500"> · {t(`payment.${e.payment_method}`)}</span>}
+                      {e.notes && <span className="text-slate-500"> · {e.notes}</span>}
                     </span>
                   ),
                 },
@@ -193,6 +199,7 @@ export default function CustomerDetail() {
                       {typeLabel(e)} {e.invoice_no && <span className="font-normal text-slate-500">· {e.invoice_no}</span>}
                     </p>
                     <p className="text-sm text-slate-500">{e.id === 'opening' ? formatDate(e.date) : formatDateTime(e.date)}</p>
+                    {e.notes && <p className="truncate text-sm text-slate-600">{e.notes}</p>}
                   </div>
                   <div className="text-right">
                     {toNumber(e.debit) > 0 && <p className="font-extrabold tabular-nums text-rose-600">+{money(e.debit)}</p>}
@@ -210,6 +217,7 @@ export default function CustomerDetail() {
 
       <CustomerFormModal open={editing} customer={c} onClose={() => setEditing(false)} onSaved={() => setEditing(false)} />
       <ReceivePaymentModal open={paying} customer={c} onClose={() => setPaying(false)} />
+      <AddUdhariModal open={giving} customer={c} onClose={() => setGiving(false)} />
       <SaleDetailModal saleId={saleId} onClose={() => setSaleId(null)} />
     </div>
   )

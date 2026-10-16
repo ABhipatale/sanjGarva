@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useQuery, keepPreviousData } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { HandCoins, UserPlus, Users } from 'lucide-react'
+import { BookPlus, HandCoins, UserPlus, Users } from 'lucide-react'
 import clsx from 'clsx'
 import PageHeader from '../../components/ui/PageHeader'
 import SearchInput from '../../components/ui/SearchInput'
@@ -13,6 +13,7 @@ import { StatCard } from '../../components/ui/Card'
 import { EmptyState, QueryState } from '../../components/ui/States'
 import CustomerFormModal from '../../components/CustomerFormModal'
 import ReceivePaymentModal from '../../components/ReceivePaymentModal'
+import AddUdhariModal from '../../components/AddUdhariModal'
 import { customerApi } from '../../services/endpoints'
 import { useDebounce } from '../../hooks/useDebounce'
 import { initials, money, num, toNumber } from '../../utils/format'
@@ -26,11 +27,12 @@ export default function Customers() {
   const [page, setPage] = useState(1)
   const [adding, setAdding] = useState(params.get('new') === '1')
   const [receiving, setReceiving] = useState(params.get('receive') === '1')
+  const [giving, setGiving] = useState(params.get('udhari') === '1')
   const term = useDebounce(search)
 
-  // Quick actions open dialogs via ?new=1 / ?receive=1; clear the flag so back/refresh doesn't reopen.
+  // Quick actions open dialogs via ?new=1 / ?receive=1 / ?udhari=1; clear the flag so back/refresh doesn't reopen.
   useEffect(() => {
-    if (params.get('new') || params.get('receive')) setParams({}, { replace: true })
+    if (params.get('new') || params.get('receive') || params.get('udhari')) setParams({}, { replace: true })
   }, [params, setParams])
 
   const query = useQuery({
@@ -46,6 +48,9 @@ export default function Customers() {
         title={t('customers.title')}
         actions={
           <>
+            <Button variant="soft" icon={BookPlus} onClick={() => setGiving(true)}>
+              <span className="hidden sm:inline">{t('customers.addUdhari')}</span>
+            </Button>
             <Button variant="gold" icon={HandCoins} onClick={() => setReceiving(true)}>
               <span className="hidden sm:inline">{t('customers.receivePayment')}</span>
             </Button>
@@ -117,6 +122,7 @@ export default function Customers() {
 
       <CustomerFormModal open={adding} onClose={() => setAdding(false)} onSaved={(c) => { setAdding(false); navigate(`/customers/${c.id}`) }} />
       <ReceivePaymentModal open={receiving} onClose={() => setReceiving(false)} />
+      <AddUdhariModal open={giving} onClose={() => setGiving(false)} />
     </div>
   )
 }

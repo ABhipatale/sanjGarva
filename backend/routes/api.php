@@ -76,6 +76,7 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::apiResource('customers', CustomerController::class);
     Route::get('customers/{customer}/ledger', [CustomerController::class, 'ledger']);
     Route::post('customers/{customer}/payment', [CustomerController::class, 'payment']);
+    Route::post('customers/{customer}/udhari', [CustomerController::class, 'udhari']);
 
     // Expenses
     Route::apiResource('expense-categories', ExpenseCategoryController::class)->except('show');

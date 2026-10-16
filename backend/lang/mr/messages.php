@@ -28,5 +28,6 @@ return [
     'sale_saved' => 'विक्री जतन झाली.',
     'sale_voided' => 'बिल रद्द केले.',
     'closing_saved' => 'दिवसअखेर हिशोब जतन झाला: :qty विकले, :amount.',
+    'udhari_added' => 'उधारी जोडली.',
     'payment_received' => 'पैसे जमा झाले.',
 ];

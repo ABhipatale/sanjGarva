@@ -55,6 +55,22 @@ class CustomerLedgerService
     }
 
     /**
+     * Udhari given directly, without a sale (money lent, old dues, items not in the system).
+     * Only the customer's khata changes: no stock, revenue or profit is touched.
+     */
+    public function addUdhari(int $customerId, array $data, ?int $userId): CustomerTransaction
+    {
+        return DB::transaction(function () use ($customerId, $data, $userId) {
+            $customer = Customer::whereKey($customerId)->lockForUpdate()->firstOrFail();
+            $date = isset($data['udhari_date'])
+                ? now()->setDateFrom(\Illuminate\Support\Carbon::parse($data['udhari_date']))
+                : now();
+
+            return $this->post($customer, 'manual', Money::round($data['amount'], 2), '0', $date, null, null, $data['notes'] ?? null, $userId);
+        });
+    }
+
+    /**
      * Post a debit (udhari) or credit (payment) to an already locked customer row.
      */
     public function post(
