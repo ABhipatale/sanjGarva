@@ -22,6 +22,7 @@ return [
     'COUNT_MORE_THAN_STOCK' => 'उरलेले :product सध्याच्या स्टॉकपेक्षा (:available) जास्त असू शकत नाहीत. जास्त सापडले असल्यास स्टॉक दुरुस्ती वापरा.',
     'NOTHING_SOLD' => 'काहीही विकले नाही: सर्व उरलेली संख्या सध्याच्या स्टॉकएवढीच आहे.',
 
+    'stock_bill_added' => ':count माल (+:qty) स्टोअरमध्ये जोडले.',
     'stock_added' => 'स्टोअरमध्ये स्टॉक जोडला.',
     'transferred' => ':qty दुकानात यशस्वीपणे ट्रान्सफर केल्या.',
     'adjusted' => 'स्टॉक दुरुस्त केला.',
@@ -29,5 +30,8 @@ return [
     'sale_voided' => 'बिल रद्द केले.',
     'closing_saved' => 'दिवसअखेर हिशोब जतन झाला: :qty विकले, :amount.',
     'udhari_added' => 'उधारी जोडली.',
+    'supplier_paid' => 'सप्लायरला दिलेले पैसे जतन झाले.',
+    'SUPPLIER_PAYMENT_EXCEEDS_BALANCE' => 'रक्कम बाकी (:balance) पेक्षा जास्त आहे.',
+    'PAID_MORE_THAN_BILL' => 'दिलेली रक्कम बिलाच्या एकूण (:total) पेक्षा जास्त असू शकत नाही.',
     'payment_received' => 'पैसे जमा झाले.',
 ];

@@ -22,7 +22,8 @@
     "stockHistory": "Stock History",
     "adjustStock": "Stock Adjustment",
     "logout": "Logout",
-    "closing": "Day Closing"
+    "closing": "Day Closing",
+    "suppliers": "Suppliers"
   },
   "common": {
     "save": "Save",
@@ -210,7 +211,14 @@
     "emptyShop": "Shop is empty.",
     "emptyShopHint": "Transfer stock from the Store to start selling.",
     "noHistory": "No stock movements yet.",
-    "lowAlert": "{{count}} products are running low"
+    "lowAlert": "{{count}} products are running low",
+    "addToBill": "Add to bill",
+    "updateInBill": "Update in bill",
+    "addAnotherProduct": "Add another product",
+    "billItems": "In this bill · {{count}} products",
+    "billCount": "{{count}} products · +{{qty}}",
+    "billSuccess": "{{count}} products (+{{qty}}) added to Store.",
+    "removeLineConfirm": "Remove {{product}} from this bill?"
   },
   "closing": {
     "title": "Day Closing",
@@ -376,6 +384,45 @@
     "udhariHint": "Only the customer’s khata changes. No product, stock or sale is used.",
     "withProducts": "Udhari Sale (with products)"
   },
+  "suppliers": {
+    "title": "Suppliers",
+    "add": "Add Supplier",
+    "edit": "Edit Supplier",
+    "name": "Supplier Name",
+    "openingBalance": "Old unpaid amount",
+    "saved": "Supplier saved.",
+    "deleted": "Supplier deleted.",
+    "deleteConfirm": "Delete {{name}}?",
+    "empty": "No suppliers added yet.",
+    "addFirst": "+ Add Supplier",
+    "searchPlaceholder": "Search supplier name or mobile…",
+    "totalPurchase": "Total Purchase",
+    "paid": "Paid",
+    "unpaid": "Unpaid",
+    "allPaid": "All paid",
+    "pay": "Pay Supplier",
+    "payAmount": "Amount paid",
+    "payConfirm": "Pay {{amount}} to {{name}}?",
+    "paySuccess": "{{amount}} paid to {{name}}.",
+    "afterPay": "Unpaid after payment",
+    "noDues": "Nothing unpaid.",
+    "select": "Select supplier",
+    "none": "No supplier (paid cash)",
+    "ledger": "Purchases & Payments",
+    "noLedger": "No purchases yet.",
+    "types": {
+      "opening": "Old unpaid",
+      "purchase": "Stock purchase",
+      "payment": "Payment"
+    },
+    "addStock": "Add Stock",
+    "payment": "Payment",
+    "paidFull": "Paid full",
+    "paidPart": "Part paid",
+    "paidNone": "Not paid",
+    "unpaidOnBill": "Unpaid on this bill",
+    "billTotal": "Bill total"
+  },
   "payment": {
     "cash": "Cash",
     "upi": "UPI",
@@ -482,6 +529,8 @@
     "ALREADY_VOIDED": "This bill is already cancelled.",
     "PRODUCT_INACTIVE": "{{product}} is inactive.",
     "COUNT_MORE_THAN_STOCK": "Remaining {{product}} cannot be more than {{available}} (current stock). Use Stock Adjustment if you found extra.",
-    "NOTHING_SOLD": "Nothing sold: every count is the same as current stock."
+    "NOTHING_SOLD": "Nothing sold: every count is the same as current stock.",
+    "SUPPLIER_PAYMENT_EXCEEDS_BALANCE": "Amount is more than unpaid balance ({{balance}}).",
+    "PAID_MORE_THAN_BILL": "Paid amount cannot be more than the bill total ({{total}})."
   }
 }

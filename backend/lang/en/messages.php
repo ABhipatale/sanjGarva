@@ -23,6 +23,7 @@ return [
     'NOTHING_SOLD' => 'Nothing sold: every remaining count is the same as current stock.',
 
     'stock_added' => 'Stock added to Store.',
+    'stock_bill_added' => ':count products (+:qty) added to Store.',
     'transferred' => ':qty transferred to Shop successfully.',
     'adjusted' => 'Stock adjusted.',
     'sale_saved' => 'Sale saved.',
@@ -30,4 +31,7 @@ return [
     'closing_saved' => 'Day closing saved: :qty sold for :amount.',
     'payment_received' => 'Payment received.',
     'udhari_added' => 'Udhari added.',
+    'supplier_paid' => 'Payment to supplier saved.',
+    'SUPPLIER_PAYMENT_EXCEEDS_BALANCE' => 'Amount is more than unpaid balance (:balance).',
+    'PAID_MORE_THAN_BILL' => 'Paid amount cannot be more than the bill total (:total).',
 ];

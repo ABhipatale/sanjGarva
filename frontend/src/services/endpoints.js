@@ -39,6 +39,7 @@ export const productApi = {
 export const stockApi = {
   location: (location, params, opts) => api.get(location === 'store' ? '/store-stock' : '/shop-stock', params, opts),
   add: (data) => api.post('/store-stock/add', data),
+  addBill: (data) => api.post('/store-stock/add-bill', data),
   purchases: (params) => api.get('/purchases', params),
   transfer: (data) => api.post('/stock/transfer', data),
   adjust: (data) => api.post('/stock/adjust', data),
@@ -63,6 +64,16 @@ export const customerApi = {
   ledger: (id, params) => api.get(`/customers/${id}/ledger`, params),
   payment: (id, data) => api.post(`/customers/${id}/payment`, data),
   udhari: (id, data) => api.post(`/customers/${id}/udhari`, data),
+}
+
+export const supplierApi = {
+  list: (params, opts) => api.get('/suppliers', params, opts),
+  get: (id) => api.get(`/suppliers/${id}`),
+  create: (data) => api.post('/suppliers', data),
+  update: (id, data) => api.put(`/suppliers/${id}`, data),
+  remove: (id) => api.delete(`/suppliers/${id}`),
+  ledger: (id) => api.get(`/suppliers/${id}/ledger`),
+  payment: (id, data) => api.post(`/suppliers/${id}/payment`, data),
 }
 
 export const expenseApi = {

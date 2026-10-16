@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Concerns\RespondsWithJson;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AddStockRequest;
+use App\Http\Requests\AddStockBillRequest;
 use App\Http\Requests\AdjustStockRequest;
 use App\Http\Requests\TransferRequest;
 use App\Http\Resources\AdjustmentResource;
@@ -47,6 +48,18 @@ class StockController extends Controller
         $purchase = $this->stock->addPurchase($request->validated(), $request->user()?->id);
 
         return $this->created(PurchaseResource::make($purchase)->resolve(), __('messages.stock_added'));
+    }
+
+    /** Several products from one supplier bill, saved together. */
+    public function addBill(AddStockBillRequest $request): JsonResponse
+    {
+        $purchases = $this->stock->addPurchaseBill($request->validated(), $request->user()?->id);
+        $qty = array_sum(array_map(fn ($p) => $p->quantity, $purchases));
+
+        return $this->created(
+            PurchaseResource::collection($purchases)->resolve(),
+            __('messages.stock_bill_added', ['count' => count($purchases), 'qty' => $qty]),
+        );
     }
 
     public function purchases(Request $request): JsonResponse

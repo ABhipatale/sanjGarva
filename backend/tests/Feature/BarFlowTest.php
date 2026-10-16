@@ -158,6 +158,90 @@ class BarFlowTest extends TestCase
             ->assertCreated()->assertJsonPath('data.balance', '0.00');
     }
 
+    public function test_supplier_purchase_paid_and_unpaid(): void
+    {
+        $p = $this->product(['opening_store' => 0, 'opening_shop' => 0]);
+        $s = $this->postJson('/api/suppliers', ['name' => 'Patil Distributors', 'opening_balance' => 500])->assertCreated()->json('data');
+        $this->assertSame('500.00', $s['balance']);
+
+        // 24 × 100 = 2400 bill, 1000 paid now → stock in Store, 500 + 1400 unpaid.
+        $this->postJson('/api/store-stock/add', [
+            'product_id' => $p['id'], 'quantity' => 24, 'cost_price' => 100, 'purchase_date' => now()->toDateString(),
+            'supplier_id' => $s['id'], 'paid_amount' => 1000, 'payment_method' => 'upi', 'invoice_no' => 'PD-77',
+        ])->assertCreated()
+            ->assertJsonPath('data.supplier', 'Patil Distributors')
+            ->assertJsonPath('data.paid_amount', '1000.00');
+
+        $this->assertSame(['store' => 24, 'shop' => 0], $this->qty($p['id']));
+        $this->getJson("/api/suppliers/{$s['id']}")
+            ->assertJsonPath('data.total_purchase', '2900.00')
+            ->assertJsonPath('data.total_paid', '1000.00')
+            ->assertJsonPath('data.balance', '1900.00');
+
+        // Cannot pay more than the bill, nor more than what is unpaid.
+        $this->postJson('/api/store-stock/add', [
+            'product_id' => $p['id'], 'quantity' => 1, 'cost_price' => 100, 'purchase_date' => now()->toDateString(),
+            'supplier_id' => $s['id'], 'paid_amount' => 150,
+        ])->assertStatus(422)->assertJsonPath('code', 'PAID_MORE_THAN_BILL');
+        $this->postJson("/api/suppliers/{$s['id']}/payment", ['amount' => 5000, 'payment_method' => 'cash'])
+            ->assertStatus(422)->assertJsonPath('code', 'SUPPLIER_PAYMENT_EXCEEDS_BALANCE');
+        $this->assertSame(['store' => 24, 'shop' => 0], $this->qty($p['id']));
+
+        $this->postJson("/api/suppliers/{$s['id']}/payment", ['amount' => 1900, 'payment_method' => 'cash'])
+            ->assertCreated()->assertJsonPath('data.balance', '0.00');
+
+        $ledger = $this->getJson("/api/suppliers/{$s['id']}/ledger")->assertOk()->json('data');
+        $this->assertSame(['payment', 'payment', 'purchase', 'opening'], array_column($ledger['entries'], 'type'));
+        $this->assertSame('PD-77', $ledger['entries'][2]['invoice_no']);
+        $this->assertSame('0.00', $ledger['closing_balance']);
+
+        $this->getJson('/api/suppliers')
+            ->assertJsonPath('meta.summary.total_unpaid', '0.00')
+            ->assertJsonPath('meta.summary.total_paid', '2900.00');
+
+        // Supplier payments are not expenses: profit is untouched.
+        $this->getJson('/api/reports/profit-loss?period=today')->assertJsonPath('data.expenses', '0.00');
+    }
+
+    public function test_supplier_bill_with_many_products_in_one_go(): void
+    {
+        $beer = $this->product(['opening_store' => 10, 'opening_shop' => 0]);
+        $rum = $this->product(['name' => 'Old Monk', 'cost_price' => 300, 'selling_price' => 400, 'opening_store' => 0, 'opening_shop' => 0]);
+        $s = $this->postJson('/api/suppliers', ['name' => 'Patil Distributors'])->assertCreated()->json('data');
+
+        // 24 × 100 + 6 × 300 = 4200, 3000 paid now.
+        $this->postJson('/api/store-stock/add-bill', [
+            'supplier_id' => $s['id'], 'paid_amount' => 3000, 'payment_method' => 'cash',
+            'invoice_no' => 'PD-90', 'purchase_date' => now()->toDateString(),
+            'items' => [
+                ['product_id' => $beer['id'], 'quantity' => 24, 'cost_price' => 100],
+                ['product_id' => $rum['id'], 'quantity' => 6, 'cost_price' => 300, 'selling_price' => 450],
+            ],
+        ])->assertCreated()
+            ->assertJsonCount(2, 'data')
+            ->assertJsonPath('data.0.paid_amount', '2400.00')
+            ->assertJsonPath('data.1.paid_amount', '600.00');
+
+        $this->assertSame(['store' => 34, 'shop' => 0], $this->qty($beer['id']));
+        $this->assertSame(['store' => 6, 'shop' => 0], $this->qty($rum['id']));
+        $this->assertSame('450.00', Product::find($rum['id'])->selling_price);
+
+        $this->getJson("/api/suppliers/{$s['id']}")
+            ->assertJsonPath('data.total_purchase', '4200.00')
+            ->assertJsonPath('data.total_paid', '3000.00')
+            ->assertJsonPath('data.balance', '1200.00');
+        // One line per product, one payment for the whole bill.
+        $this->assertSame(['payment', 'purchase', 'purchase'], array_column($this->getJson("/api/suppliers/{$s['id']}/ledger")->json('data.entries'), 'type'));
+
+        // Paying more than the bill rolls back every line.
+        $this->postJson('/api/store-stock/add-bill', [
+            'supplier_id' => $s['id'], 'paid_amount' => 999999, 'purchase_date' => now()->toDateString(),
+            'items' => [['product_id' => $beer['id'], 'quantity' => 1, 'cost_price' => 100], ['product_id' => $rum['id'], 'quantity' => 1, 'cost_price' => 300]],
+        ])->assertStatus(422)->assertJsonPath('code', 'PAID_MORE_THAN_BILL');
+        $this->assertSame(['store' => 34, 'shop' => 0], $this->qty($beer['id']));
+        $this->assertSame(['store' => 6, 'shop' => 0], $this->qty($rum['id']));
+    }
+
     public function test_weighted_average_cost_and_historical_profit(): void
     {
         $p = $this->product(['opening_store' => 10, 'opening_shop' => 0, 'cost_price' => 100]);

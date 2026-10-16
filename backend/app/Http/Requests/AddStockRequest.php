@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Models\CustomerTransaction;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class AddStockRequest extends FormRequest
 {
@@ -19,6 +21,9 @@ class AddStockRequest extends FormRequest
             'cost_price' => ['required', 'numeric', 'min:0', 'max:9999999999'],
             'selling_price' => ['nullable', 'numeric', 'min:0', 'max:9999999999'],
             'supplier' => ['nullable', 'string', 'max:150'],
+            'supplier_id' => ['nullable', 'integer', 'exists:suppliers,id'],
+            'paid_amount' => ['nullable', 'numeric', 'min:0', 'max:9999999999'],
+            'payment_method' => ['nullable', Rule::in(CustomerTransaction::PAYMENT_METHODS)],
             'invoice_no' => ['nullable', 'string', 'max:60'],
             'purchase_date' => ['required', 'date_format:Y-m-d', 'before_or_equal:today'],
             'notes' => ['nullable', 'string', 'max:1000'],

@@ -28,7 +28,7 @@ class EndpointsSmokeTest extends TestCase
             '/api/stock/movements?location=shop', '/api/stock/adjustments', '/api/sales?period=week',
             "/api/sales/{$sale->id}", '/api/customers?with_dues=1&sort=balance', "/api/customers/{$customer->id}",
             "/api/customers/{$customer->id}/ledger?from=2020-01-01&to=2099-12-31", '/api/expense-categories',
-            '/api/expenses?period=month', '/api/reports/sales?group=week', '/api/reports/stock',
+            '/api/expenses?period=month', '/api/suppliers', '/api/reports/sales?group=week', '/api/reports/stock',
             '/api/reports/profit-loss?period=last_month', '/api/reports/udhari', '/api/reports/expenses',
         ];
         foreach ($urls as $url) {

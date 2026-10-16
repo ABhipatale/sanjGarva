@@ -28,7 +28,7 @@ export function useCustomer(id) {
 export function useInvalidateBusiness() {
   const qc = useQueryClient()
   return (...extra) => {
-    ;['dashboard', 'stock', 'products', 'sales', 'movements', 'reports', 'customers', 'customer', 'ledger', 'expenses', 'purchases', ...extra].forEach(
+    ;['dashboard', 'stock', 'products', 'sales', 'movements', 'reports', 'customers', 'customer', 'ledger', 'expenses', 'purchases', 'suppliers', 'supplier', ...extra].forEach(
       (key) => qc.invalidateQueries({ queryKey: [key] }),
     )
   }

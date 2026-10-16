@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { BarChart3, Boxes, ClipboardCheck, History, LogOut, Package, Receipt, Settings, SlidersHorizontal, Store, Wallet, ArrowRightLeft, PackagePlus } from 'lucide-react'
+import { BarChart3, Boxes, ClipboardCheck, History, Truck, LogOut, Package, Receipt, Settings, SlidersHorizontal, Store, Wallet, ArrowRightLeft, PackagePlus } from 'lucide-react'
 import LanguageToggle from '../components/LanguageToggle'
 import { useAuth } from '../context/AuthContext'
 import { useConfirm } from '../context/ConfirmContext'
@@ -11,6 +11,7 @@ const LINKS = [
   { to: '/stock/closing', icon: ClipboardCheck, key: 'nav.closing', tone: 'bg-indigo-50 text-indigo-700' },
   { to: '/stock/add', icon: PackagePlus, key: 'quick.addStock', tone: 'bg-emerald-50 text-emerald-700' },
   { to: '/stock/transfer', icon: ArrowRightLeft, key: 'quick.transfer', tone: 'bg-sky-50 text-sky-700' },
+  { to: '/suppliers', icon: Truck, key: 'nav.suppliers', tone: 'bg-orange-50 text-orange-700' },
   { to: '/sales', icon: Receipt, key: 'nav.salesHistory', tone: 'bg-amber-50 text-amber-700' },
   { to: '/products', icon: Package, key: 'nav.products', tone: 'bg-violet-50 text-violet-700' },
   { to: '/expenses', icon: Wallet, key: 'nav.expenses', tone: 'bg-rose-50 text-rose-700' },

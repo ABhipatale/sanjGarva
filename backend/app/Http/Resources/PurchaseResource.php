@@ -25,6 +25,8 @@ class PurchaseResource extends JsonResource
             'total_cost' => $this->total_cost,
             'selling_price' => $this->selling_price,
             'supplier' => $this->supplier,
+            'supplier_id' => $this->supplier_id,
+            'paid_amount' => $this->paid_amount,
             'invoice_no' => $this->invoice_no,
             'purchase_date' => $this->purchase_date?->toDateString(),
             'notes' => $this->notes,

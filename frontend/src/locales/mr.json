@@ -22,7 +22,8 @@
     "stockHistory": "स्टॉक इतिहास",
     "adjustStock": "स्टॉक दुरुस्ती",
     "logout": "लॉगआउट",
-    "closing": "दिवसअखेर हिशोब"
+    "closing": "दिवसअखेर हिशोब",
+    "suppliers": "सप्लायर"
   },
   "common": {
     "save": "जतन करा",
@@ -210,7 +211,14 @@
     "emptyShop": "दुकानात स्टॉक नाही.",
     "emptyShopHint": "विक्रीसाठी स्टोअरमधून स्टॉक ट्रान्सफर करा.",
     "noHistory": "अजून स्टॉक हालचाल नाही.",
-    "lowAlert": "{{count}} उत्पादनांचा स्टॉक कमी आहे"
+    "lowAlert": "{{count}} उत्पादनांचा स्टॉक कमी आहे",
+    "addToBill": "बिलात जोडा",
+    "updateInBill": "बिलात बदला",
+    "addAnotherProduct": "आणखी माल जोडा",
+    "billItems": "या बिलात · {{count}} माल",
+    "billCount": "{{count}} माल · +{{qty}}",
+    "billSuccess": "{{count}} माल (+{{qty}}) स्टोअरमध्ये जोडले.",
+    "removeLineConfirm": "{{product}} या बिलातून काढायचा?"
   },
   "closing": {
     "title": "दिवसअखेर हिशोब",
@@ -376,6 +384,45 @@
     "udhariHint": "फक्त ग्राहकाचे खाते बदलते. कोणताही माल, स्टॉक किंवा विक्री वापरली जात नाही.",
     "withProducts": "मालासह उधारी विक्री"
   },
+  "suppliers": {
+    "title": "सप्लायर",
+    "add": "सप्लायर जोडा",
+    "edit": "सप्लायर बदला",
+    "name": "सप्लायरचे नाव",
+    "openingBalance": "जुनी बाकी (द्यायची)",
+    "saved": "सप्लायर जतन झाला.",
+    "deleted": "सप्लायर हटवला.",
+    "deleteConfirm": "{{name}} हटवायचा?",
+    "empty": "अजून सप्लायर जोडले नाहीत.",
+    "addFirst": "+ सप्लायर जोडा",
+    "searchPlaceholder": "सप्लायरचे नाव किंवा मोबाईल शोधा…",
+    "totalPurchase": "एकूण खरेदी",
+    "paid": "दिले",
+    "unpaid": "बाकी",
+    "allPaid": "सर्व दिले",
+    "pay": "सप्लायरला पैसे द्या",
+    "payAmount": "दिलेली रक्कम",
+    "payConfirm": "{{name}} यांना {{amount}} द्यायचे?",
+    "paySuccess": "{{name}} यांना {{amount}} दिले.",
+    "afterPay": "दिल्यानंतर बाकी",
+    "noDues": "काहीही बाकी नाही.",
+    "select": "सप्लायर निवडा",
+    "none": "सप्लायर नाही (रोख दिले)",
+    "ledger": "खरेदी व पेमेंट",
+    "noLedger": "अजून खरेदी नाही.",
+    "types": {
+      "opening": "जुनी बाकी",
+      "purchase": "माल खरेदी",
+      "payment": "पेमेंट"
+    },
+    "addStock": "स्टॉक जोडा",
+    "payment": "पेमेंट",
+    "paidFull": "पूर्ण दिले",
+    "paidPart": "थोडे दिले",
+    "paidNone": "दिले नाही",
+    "unpaidOnBill": "या बिलावर बाकी",
+    "billTotal": "बिल एकूण"
+  },
   "payment": {
     "cash": "रोख",
     "upi": "UPI",
@@ -482,6 +529,8 @@
     "ALREADY_VOIDED": "हे बिल आधीच रद्द केले आहे.",
     "PRODUCT_INACTIVE": "{{product}} बंद आहे.",
     "COUNT_MORE_THAN_STOCK": "उरलेले {{product}} सध्याच्या स्टॉकपेक्षा ({{available}}) जास्त असू शकत नाहीत. जास्त सापडले असल्यास स्टॉक दुरुस्ती वापरा.",
-    "NOTHING_SOLD": "काहीही विकले नाही: सर्व संख्या सध्याच्या स्टॉकएवढीच आहे."
+    "NOTHING_SOLD": "काहीही विकले नाही: सर्व संख्या सध्याच्या स्टॉकएवढीच आहे.",
+    "SUPPLIER_PAYMENT_EXCEEDS_BALANCE": "रक्कम बाकी ({{balance}}) पेक्षा जास्त आहे.",
+    "PAID_MORE_THAN_BILL": "दिलेली रक्कम बिलाच्या एकूण ({{total}}) पेक्षा जास्त असू शकत नाही."
   }
 }

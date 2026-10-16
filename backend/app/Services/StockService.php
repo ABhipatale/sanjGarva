@@ -10,6 +10,7 @@ use App\Models\StockAdjustment;
 use App\Models\StockTransaction;
 use App\Models\StockTransfer;
 use App\Models\StoreStock;
+use App\Models\Supplier;
 use App\Support\Money;
 use Illuminate\Support\Facades\DB;
 
@@ -26,6 +27,8 @@ use Illuminate\Support\Facades\DB;
  */
 class StockService
 {
+    public function __construct(private readonly SupplierLedgerService $suppliers) {}
+
     /** Create zeroed balance rows and post opening stock for a new product. */
     public function initialize(Product $product, int $openingStore, int $openingShop, ?int $userId): void
     {
@@ -39,37 +42,93 @@ class StockService
         }
     }
 
-    /** Purchase / stock received into the Store. */
+    /** One product received into the Store (a bill with a single line). */
     public function addPurchase(array $data, ?int $userId): Purchase
     {
+        return $this->addPurchaseBill(array_merge($data, ['items' => [$data]]), $userId)[0];
+    }
+
+    /**
+     * One supplier bill with several products, received into the Store in one transaction:
+     * every line becomes a purchase (stock + weighted average cost). With a supplier, each line is
+     * posted to the supplier's khata (unpaid goes up) and the amount paid now is posted once for the
+     * whole bill. Any failure rolls back the entire bill.
+     *
+     * @param  array{items: array<int, array{product_id:int, quantity:int, cost_price:numeric, selling_price?:numeric|null}>, supplier_id?:int|null, paid_amount?:numeric|null, payment_method?:string|null, supplier?:string|null, invoice_no?:string|null, purchase_date?:string|null, notes?:string|null}  $data
+     * @return list<Purchase>
+     */
+    public function addPurchaseBill(array $data, ?int $userId): array
+    {
         return DB::transaction(function () use ($data, $userId) {
-            $product = Product::whereKey($data['product_id'])->lockForUpdate()->firstOrFail();
-            $qty = (int) $data['quantity'];
-            $unitCost = Money::round($data['cost_price'], 2);
+            // Lock products in a stable order to avoid deadlocks; lines keep the order they were entered in.
+            $ids = array_unique(array_map(fn ($item) => (int) $item['product_id'], $data['items']));
+            $products = Product::whereIn('id', $ids)->orderBy('id')->lockForUpdate()->get()->keyBy('id');
 
-            $this->receiveAtCost($product, $qty, $unitCost);
-            $product->cost_price = $unitCost;
-            if (isset($data['selling_price']) && $data['selling_price'] !== '') {
-                $product->selling_price = Money::round($data['selling_price'], 2);
+            $lines = [];
+            $billTotal = '0';
+            foreach ($data['items'] as $item) {
+                $qty = (int) $item['quantity'];
+                $unitCost = Money::round($item['cost_price'], 2);
+                $lineTotal = Money::round(Money::mul($qty, $unitCost), 2);
+                $lines[] = [$products[(int) $item['product_id']], $item, $qty, $unitCost, $lineTotal];
+                $billTotal = Money::add($billTotal, $lineTotal);
             }
-            $product->save();
+            $billTotal = Money::round($billTotal, 2);
 
-            $purchase = Purchase::create([
-                'product_id' => $product->id,
-                'quantity' => $qty,
-                'unit_cost' => $unitCost,
-                'total_cost' => Money::round(Money::mul($qty, $unitCost), 2),
-                'selling_price' => $data['selling_price'] ?? null,
-                'supplier' => $data['supplier'] ?? null,
-                'invoice_no' => $data['invoice_no'] ?? null,
-                'purchase_date' => $data['purchase_date'] ?? now()->toDateString(),
-                'notes' => $data['notes'] ?? null,
-                'user_id' => $userId,
-            ]);
+            $supplier = ! empty($data['supplier_id']) ? Supplier::whereKey($data['supplier_id'])->lockForUpdate()->firstOrFail() : null;
+            // Stock bought without a supplier account is treated as paid in full.
+            $paid = $supplier ? Money::round($data['paid_amount'] ?? 0, 2) : $billTotal;
+            if (Money::cmp($paid, $billTotal) > 0) {
+                throw new BusinessException('PAID_MORE_THAN_BILL', ['total' => $billTotal]);
+            }
 
-            $this->move($product->id, 'store', $qty, 'purchase', $unitCost, 'purchase', $purchase->id, $data['invoice_no'] ?? null, $userId);
+            $invoice = $data['invoice_no'] ?? null;
+            $purchaseDate = $data['purchase_date'] ?? now()->toDateString();
+            $ledgerDate = now()->setDateFrom(\Illuminate\Support\Carbon::parse($purchaseDate));
+            // Paid amount is split over the lines in order, so each purchase row shows what was paid for it.
+            $paidLeft = $paid;
+            $purchases = [];
 
-            return $purchase->load('product');
+            foreach ($lines as [$product, $item, $qty, $unitCost, $lineTotal]) {
+                $this->receiveAtCost($product, $qty, $unitCost);
+                $product->cost_price = $unitCost;
+                if (isset($item['selling_price']) && $item['selling_price'] !== '') {
+                    $product->selling_price = Money::round($item['selling_price'], 2);
+                }
+                $product->save();
+
+                $linePaid = Money::cmp($paidLeft, $lineTotal) > 0 ? $lineTotal : $paidLeft;
+                $paidLeft = Money::round(Money::sub($paidLeft, $linePaid), 2);
+
+                $purchase = Purchase::create([
+                    'product_id' => $product->id,
+                    'quantity' => $qty,
+                    'unit_cost' => $unitCost,
+                    'total_cost' => $lineTotal,
+                    'selling_price' => $item['selling_price'] ?? null,
+                    'supplier' => $supplier?->name ?? ($data['supplier'] ?? null),
+                    'supplier_id' => $supplier?->id,
+                    'paid_amount' => $linePaid,
+                    'invoice_no' => $invoice,
+                    'purchase_date' => $purchaseDate,
+                    'notes' => $data['notes'] ?? null,
+                    'user_id' => $userId,
+                ]);
+
+                // Store balance must include this line before the next line of the same product is costed.
+                $this->move($product->id, 'store', $qty, 'purchase', $unitCost, 'purchase', $purchase->id, $invoice, $userId);
+
+                if ($supplier) {
+                    $this->suppliers->post($supplier, 'purchase', $lineTotal, '0', $ledgerDate, $purchase->id, null, $invoice, $userId);
+                }
+                $purchases[] = $purchase->setRelation('product', $product);
+            }
+
+            if ($supplier && Money::cmp($paid, 0) > 0) {
+                $this->suppliers->post($supplier, 'payment', '0', $paid, $ledgerDate, $purchases[0]->id, $data['payment_method'] ?? 'cash', $invoice, $userId);
+            }
+
+            return $purchases;
         });
     }
 

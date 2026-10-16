@@ -20,6 +20,8 @@ const ClosingStock = lazy(() => import('./pages/stock/ClosingStock'))
 const Products = lazy(() => import('./pages/products/Products'))
 const ProductForm = lazy(() => import('./pages/products/ProductForm'))
 const Customers = lazy(() => import('./pages/customers/Customers'))
+const Suppliers = lazy(() => import('./pages/suppliers/Suppliers'))
+const SupplierDetail = lazy(() => import('./pages/suppliers/SupplierDetail'))
 const CustomerDetail = lazy(() => import('./pages/customers/CustomerDetail'))
 const Expenses = lazy(() => import('./pages/Expenses'))
 const Reports = lazy(() => import('./pages/reports/Reports'))
@@ -71,6 +73,8 @@ export default function App() {
           <Route path="products/:id/edit" element={<ProductForm />} />
           <Route path="customers" element={<Customers />} />
           <Route path="customers/:id" element={<CustomerDetail />} />
+          <Route path="suppliers" element={<Suppliers />} />
+          <Route path="suppliers/:id" element={<SupplierDetail />} />
           <Route path="expenses" element={<Expenses />} />
           <Route path="reports" element={<Reports />} />
           <Route path="settings" element={<Settings />} />

@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\SaleController;
 use App\Http\Controllers\Api\SettingsController;
 use App\Http\Controllers\Api\StockController;
+use App\Http\Controllers\Api\SupplierController;
 use App\Http\Middleware\EnsureDatabaseMigrated;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
@@ -58,6 +59,7 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     // Inventory
     Route::get('store-stock', [StockController::class, 'store']);
     Route::post('store-stock/add', [StockController::class, 'add']);
+    Route::post('store-stock/add-bill', [StockController::class, 'addBill']);
     Route::get('shop-stock', [StockController::class, 'shop']);
     Route::get('purchases', [StockController::class, 'purchases']);
     Route::post('stock/transfer', [StockController::class, 'transfer']);
@@ -77,6 +79,11 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::get('customers/{customer}/ledger', [CustomerController::class, 'ledger']);
     Route::post('customers/{customer}/payment', [CustomerController::class, 'payment']);
     Route::post('customers/{customer}/udhari', [CustomerController::class, 'udhari']);
+
+    // Suppliers (khata of what the bar owes)
+    Route::apiResource('suppliers', SupplierController::class);
+    Route::get('suppliers/{supplier}/ledger', [SupplierController::class, 'ledger']);
+    Route::post('suppliers/{supplier}/payment', [SupplierController::class, 'payment']);
 
     // Expenses
     Route::apiResource('expense-categories', ExpenseCategoryController::class)->except('show');

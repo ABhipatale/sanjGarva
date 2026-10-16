@@ -21,6 +21,7 @@ backend/    Laravel 12 REST API (Sanctum tokens) + PostgreSQL → deploy to any 
 | Stock history | Every movement per product/location with running balance |
 | Products & categories | Marathi names, units (bottle/can/case/box/piece/peg), size, min stock, cost/selling price, live profit & margin |
 | Customers / Udhari | Opening balance, udhari sales, receive payment (cannot exceed outstanding), ledger with date filter, print/PDF, WhatsApp reminder |
+| Suppliers | Supplier khata: Add Stock with a supplier posts the bill (Paid full / Part / Not paid); each supplier shows total purchase, paid and unpaid; pay later from the supplier page. Not counted as expenses (stock cost reaches profit via COGS) |
 | Expenses | Categories (Marathi), date-wise/category-wise totals; included in P&L |
 | Reports | Sales (day/week/month + top products), Profit & Loss, Stock, Udhari, Expenses — print/PDF and CSV export |
 | Settings | Bar name (EN/MR), logo upload, currency, default low-stock level, CSV backups, change password |

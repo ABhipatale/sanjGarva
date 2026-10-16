@@ -9,7 +9,7 @@ class Purchase extends Model
 {
     protected $fillable = [
         'product_id', 'quantity', 'unit_cost', 'total_cost', 'selling_price',
-        'supplier', 'invoice_no', 'purchase_date', 'notes', 'user_id',
+        'supplier', 'supplier_id', 'paid_amount', 'invoice_no', 'purchase_date', 'notes', 'user_id',
     ];
 
     protected function casts(): array
@@ -19,6 +19,7 @@ class Purchase extends Model
             'unit_cost' => 'decimal:2',
             'total_cost' => 'decimal:2',
             'selling_price' => 'decimal:2',
+            'paid_amount' => 'decimal:2',
             'purchase_date' => 'date:Y-m-d',
         ];
     }
