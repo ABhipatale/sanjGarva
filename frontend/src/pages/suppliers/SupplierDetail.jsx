@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { Banknote, MessageCircle, PackagePlus, Pencil, Phone, Trash2, Truck } from 'lucide-react'
+import { Banknote, FileDown, MessageCircle, PackagePlus, Pencil, Phone, Trash2, Truck } from 'lucide-react'
 import clsx from 'clsx'
 import PageHeader from '../../components/ui/PageHeader'
 import Button from '../../components/ui/Button'
@@ -16,6 +16,7 @@ import { useWhatsApp } from '../../context/WhatsAppContext'
 import { useToast } from '../../context/ToastContext'
 import { useConfirm } from '../../context/ConfirmContext'
 import { formatDate, localName, money, num, toNumber } from '../../utils/format'
+import { supplierLedgerPdf } from '../../utils/reportPdfs'
 
 export default function SupplierDetail() {
   const { id } = useParams()
@@ -28,6 +29,7 @@ export default function SupplierDetail() {
   const { data: settings } = useSettings()
   const [editing, setEditing] = useState(false)
   const [paying, setPaying] = useState(false)
+  const [pdfBusy, setPdfBusy] = useState(false)
 
   const supplier = useQuery({ queryKey: ['supplier', String(id)], queryFn: () => supplierApi.get(id).then((r) => r.data) })
   const ledger = useQuery({ queryKey: ['supplier', String(id), 'ledger'], queryFn: () => supplierApi.ledger(id).then((r) => r.data) })
@@ -112,7 +114,28 @@ export default function SupplierDetail() {
         </Button>
       </div>
 
-      <h2 className="text-[17px] font-bold text-slate-900">{t('suppliers.ledger')}</h2>
+      <div className="flex items-center justify-between gap-2">
+        <h2 className="text-[17px] font-bold text-slate-900">{t('suppliers.ledger')}</h2>
+        <Button
+          variant="secondary"
+          size="sm"
+          icon={FileDown}
+          loading={pdfBusy}
+          disabled={!ledger.data?.entries.length}
+          onClick={async () => {
+            setPdfBusy(true)
+            try {
+              await supplierLedgerPdf(s, ledger.data, settings, describe)
+            } catch (err) {
+              toast.error(err.message)
+            } finally {
+              setPdfBusy(false)
+            }
+          }}
+        >
+          {t('common.downloadPdf')}
+        </Button>
+      </div>
       <QueryState query={ledger} isEmpty={(d) => d.entries.length === 0} empty={<EmptyState icon={Truck} title={t('suppliers.noLedger')} />}>
         {(d) => (
           <ul className="divide-y divide-slate-100 overflow-hidden rounded-2xl bg-white shadow-card ring-1 ring-slate-200/70">

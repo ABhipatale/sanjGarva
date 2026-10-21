@@ -262,6 +262,10 @@ class BarFlowTest extends TestCase
         $this->assertSame(['products' => 2, 'qty' => 12, 'cost' => '1600.00', 'sales' => '2300.00', 'profit' => '700.00', 'margin' => '30.4', 'expenses' => '900.00', 'net_profit' => '-200.00'], $d['totals']);
 
         $csv = $this->get('/api/export/product-sales?period=today')->assertOk()->streamedContent();
+        $this->assertSame(now()->toDateString(), $d['daily'][0]['date']);
+        $this->assertCount(2, $d['daily']);
+        $this->assertStringContainsString(now()->format('d-m-Y').',Kingfisher,,10,100.00,150.00,1000.00,1500.00,500.00,33.3', $csv);
+        $this->assertStringContainsString('TOTAL,,,12,,,1600.00,2300.00,700.00,30.4', $csv);
         $this->assertStringContainsString('Kingfisher,,,10,100.00,150.00,1000.00,1500.00,500.00,33.3', $csv);
         $this->assertStringContainsString(',TOTAL,,,12,,,1600.00,2300.00,700.00,30.4', $csv);
         $this->assertStringContainsString('"NET LOSS",-200.00', $csv);

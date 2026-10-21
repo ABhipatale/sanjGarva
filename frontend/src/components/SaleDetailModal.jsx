@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { Ban, Printer } from 'lucide-react'
+import { Ban, FileDown } from 'lucide-react'
 import Modal from './ui/Modal'
 import Button from './ui/Button'
 import { Badge, PaymentBadge } from './ui/Badge'
@@ -12,6 +12,7 @@ import { useToast } from '../context/ToastContext'
 import { useConfirm } from '../context/ConfirmContext'
 import { useInvalidateBusiness, useSettings } from '../hooks/queries'
 import { formatDateTime, localName, money, num } from '../utils/format'
+import { billPdf } from '../utils/reportPdfs'
 
 export default function SaleDetailModal({ saleId, onClose }) {
   const { t } = useTranslation()
@@ -20,6 +21,7 @@ export default function SaleDetailModal({ saleId, onClose }) {
   const invalidate = useInvalidateBusiness()
   const { data: settings } = useSettings()
   const [reason, setReason] = useState('')
+  const [pdfBusy, setPdfBusy] = useState(false)
 
   const query = useQuery({ queryKey: ['sales', 'detail', saleId], queryFn: () => saleApi.get(saleId).then((r) => r.data), enabled: !!saleId })
   const sale = query.data
@@ -100,8 +102,22 @@ export default function SaleDetailModal({ saleId, onClose }) {
           {sale.void_reason && <p className="mt-3 text-sm text-rose-600">{t('sales.voidReason')}: {sale.void_reason}</p>}
 
           <div className="mt-5 grid grid-cols-2 gap-3 no-print">
-            <Button variant="secondary" icon={Printer} onClick={() => window.print()}>
-              {t('common.print')}
+            <Button
+              variant="secondary"
+              icon={FileDown}
+              loading={pdfBusy}
+              onClick={async () => {
+                setPdfBusy(true)
+                try {
+                  await billPdf(sale, settings)
+                } catch (err) {
+                  toast.error(err.message)
+                } finally {
+                  setPdfBusy(false)
+                }
+              }}
+            >
+              {t('common.downloadPdf')}
             </Button>
             {sale.status !== 'void' && (
               <Button variant="secondary" icon={Ban} className="text-rose-600" onClick={onVoid} loading={voidMutation.isPending}>

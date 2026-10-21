@@ -117,6 +117,42 @@ class ReportService
      */
     public function productSales(DateRange $range): array
     {
+        // Same numbers split by day: one row per product per date (for the dated Excel / PDF sheets).
+        $daily = SaleItem::query()
+            ->join('sales', 'sales.id', '=', 'sale_items.sale_id')
+            ->leftJoin('products', 'products.id', '=', 'sale_items.product_id')
+            ->where('sales.status', 'completed')
+            ->when($range->from, fn ($q) => $q->where('sales.sold_at', '>=', $range->from))
+            ->when($range->to, fn ($q) => $q->where('sales.sold_at', '<=', $range->to))
+            ->groupByRaw('DATE(sales.sold_at), sale_items.product_id, products.name, products.name_mr, products.bottle_size')
+            ->selectRaw('DATE(sales.sold_at) AS day, sale_items.product_id, products.name, products.name_mr, products.bottle_size')
+            ->selectRaw('MAX(sale_items.product_name) AS product_name')
+            ->selectRaw('SUM(sale_items.quantity) AS qty, SUM(sale_items.line_total) AS sales')
+            ->selectRaw('SUM(sale_items.line_cost) AS cost, SUM(sale_items.line_profit) AS profit')
+            ->orderByRaw('DATE(sales.sold_at)')
+            ->orderByDesc('sales')
+            ->toBase()
+            ->get()
+            ->map(function ($r) {
+                $qty = (int) $r->qty;
+
+                return [
+                    'date' => substr((string) $r->day, 0, 10),
+                    'product_id' => (int) $r->product_id,
+                    'name' => $r->name ?? $r->product_name,
+                    'name_mr' => $r->name_mr,
+                    'bottle_size' => $r->bottle_size,
+                    'qty' => $qty,
+                    'avg_cost' => $qty ? Money::round(Money::div($r->cost, $qty), 2) : '0.00',
+                    'avg_price' => $qty ? Money::round(Money::div($r->sales, $qty), 2) : '0.00',
+                    'cost' => Money::round($r->cost, 2),
+                    'sales' => Money::round($r->sales, 2),
+                    'profit' => Money::round($r->profit, 2),
+                    'margin' => Money::percent($r->profit, $r->sales),
+                ];
+            })
+            ->all();
+
         $rows = SaleItem::query()
             ->join('sales', 'sales.id', '=', 'sale_items.sale_id')
             ->leftJoin('products', 'products.id', '=', 'sale_items.product_id')
@@ -170,6 +206,7 @@ class ReportService
         return [
             'range' => $range->toArray(),
             'rows' => $rows,
+            'daily' => $daily,
             'totals' => [
                 'products' => count($rows),
                 'qty' => array_sum(array_column($rows, 'qty')),

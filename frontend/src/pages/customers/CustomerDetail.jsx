@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { BookPlus, FileDown, HandCoins, MessageCircle, Pencil, Phone, Printer, Share2, ShoppingCart, Trash2 } from 'lucide-react'
+import { BookPlus, FileDown, HandCoins, MessageCircle, Pencil, Phone, Share2, ShoppingCart, Trash2 } from 'lucide-react'
 import clsx from 'clsx'
 import PageHeader from '../../components/ui/PageHeader'
 import Button from '../../components/ui/Button'
@@ -19,6 +19,7 @@ import { useCustomer, useInvalidateBusiness, useSettings } from '../../hooks/que
 import { useToast } from '../../context/ToastContext'
 import { useConfirm } from '../../context/ConfirmContext'
 import { formatDate, formatDateTime, initials, localName, money, toNumber } from '../../utils/format'
+import { customerLedgerPdf } from '../../utils/reportPdfs'
 
 export default function CustomerDetail() {
   const { id } = useParams()
@@ -33,6 +34,7 @@ export default function CustomerDetail() {
   const [paying, setPaying] = useState(false)
   const [giving, setGiving] = useState(false)
   const [saleId, setSaleId] = useState(null)
+  const [pdfBusy, setPdfBusy] = useState(false)
 
   const customerQuery = useCustomer(id)
   const ledger = useQuery({
@@ -68,6 +70,18 @@ export default function CustomerDetail() {
       }
     } else {
       window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(reminder)}`, '_blank', 'noopener')
+    }
+  }
+
+  const downloadKhata = async () => {
+    if (!ledger.data) return
+    setPdfBusy(true)
+    try {
+      await customerLedgerPdf(c, ledger.data, settings, typeLabel, period.period !== 'all')
+    } catch (err) {
+      toast.error(err.message)
+    } finally {
+      setPdfBusy(false)
     }
   }
 
@@ -149,8 +163,7 @@ export default function CustomerDetail() {
       <div className="flex items-center justify-between gap-2 no-print">
         <h2 className="text-[17px] font-bold text-slate-900">{t('customers.ledger')}</h2>
         <div className="flex gap-2">
-          <Button variant="secondary" size="sm" icon={Printer} onClick={() => window.print()}>{t('common.print')}</Button>
-          <Button variant="secondary" size="sm" icon={FileDown} onClick={() => window.print()} className="hidden sm:inline-flex">{t('common.downloadPdf')}</Button>
+          <Button variant="secondary" size="sm" icon={FileDown} onClick={downloadKhata} loading={pdfBusy} disabled={!ledger.data}>{t('common.downloadPdf')}</Button>
         </div>
       </div>
       <PeriodFilter value={period} onChange={setPeriod} allowAll />

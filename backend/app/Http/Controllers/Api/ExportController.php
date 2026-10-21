@@ -14,6 +14,7 @@ use App\Services\ReportService;
 use App\Services\SettingsService;
 use App\Support\DateRange;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
@@ -55,6 +56,16 @@ class ExportController extends Controller
         fputcsv($out, ['Generated', now()->format('d-m-Y H:i')]);
         fputcsv($out, []);
 
+        // Date-wise: one row per product per day, so Excel can filter / pivot by date.
+        fputcsv($out, ['Date', 'Product', 'Size', 'Qty Sold', 'Cost Rate', 'Selling Rate', 'Total Cost', 'Total Selling', 'Profit / Loss', 'Margin %']);
+        foreach ($report['daily'] as $r) {
+            fputcsv($out, [Carbon::parse($r['date'])->format('d-m-Y'), $r['name'], $r['bottle_size'], $r['qty'], $r['avg_cost'], $r['avg_price'],
+                $r['cost'], $r['sales'], $r['profit'], $r['margin']]);
+        }
+        fputcsv($out, ['TOTAL', '', '', $totals['qty'], '', '', $totals['cost'], $totals['sales'], $totals['profit'], $totals['margin']]);
+        fputcsv($out, []);
+
+        fputcsv($out, ['Product-wise summary']);
         fputcsv($out, ['Sr', 'Product', 'Size', 'Category', 'Qty Sold', 'Avg Cost Rate', 'Avg Selling Rate', 'Total Cost', 'Total Selling', 'Profit / Loss', 'Margin %']);
         foreach ($report['rows'] as $i => $r) {
             fputcsv($out, [$i + 1, $r['name'], $r['bottle_size'], $r['category'], $r['qty'], $r['avg_cost'], $r['avg_price'],

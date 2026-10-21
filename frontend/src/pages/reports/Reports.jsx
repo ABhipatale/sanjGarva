@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { BarChart3, Boxes, FileSpreadsheet, HandCoins, Package, Printer, Scale, Wallet } from 'lucide-react'
+import { BarChart3, Boxes, FileDown, FileSpreadsheet, HandCoins, Package, Scale, Wallet } from 'lucide-react'
 import clsx from 'clsx'
 import PageHeader from '../../components/ui/PageHeader'
 import PeriodFilter from '../../components/ui/PeriodFilter'
@@ -15,6 +15,8 @@ import { EmptyState, QueryState, Skeleton } from '../../components/ui/States'
 import BarChart from '../../components/BarChart'
 import { reportApi } from '../../services/endpoints'
 import { useToast } from '../../context/ToastContext'
+import { useSettings } from '../../hooks/queries'
+import { expensesPdf, productSalesPdf, profitPdf, salesPdf, stockPdf, udhariPdf } from '../../utils/reportPdfs'
 import { formatDate, localName, money, num, percent, toNumber } from '../../utils/format'
 
 const TABS = [
@@ -54,24 +56,26 @@ export default function Reports() {
   )
 }
 
-function Toolbar({ exportType, period }) {
+/** PDF (direct download, Excel-style) and Excel CSV for the current report. */
+function Toolbar({ exportType, period, onPdf }) {
   const { t } = useTranslation()
   const toast = useToast()
-  const [busy, setBusy] = useState(false)
-  const doExport = async () => {
-    setBusy(true)
+  const { data: settings } = useSettings()
+  const [busy, setBusy] = useState('')
+  const run = async (kind, fn) => {
+    setBusy(kind)
     try {
-      await reportApi.export(exportType, period?.period === 'all' ? {} : period)
+      await fn()
     } catch (err) {
       toast.error(err.message)
     } finally {
-      setBusy(false)
+      setBusy('')
     }
   }
   return (
     <div className="flex flex-wrap justify-end gap-2 no-print">
-      <Button variant="secondary" size="sm" icon={Printer} onClick={() => window.print()}>{t('common.print')} / PDF</Button>
-      {exportType && <Button variant="secondary" size="sm" icon={FileSpreadsheet} onClick={doExport} loading={busy}>{t('common.exportCsv')}</Button>}
+      {onPdf && <Button variant="secondary" size="sm" icon={FileDown} onClick={() => run('pdf', () => onPdf(settings))} loading={busy === 'pdf'}>{t('common.downloadPdf')}</Button>}
+      {exportType && <Button variant="secondary" size="sm" icon={FileSpreadsheet} onClick={() => run('csv', () => reportApi.export(exportType, period?.period === 'all' ? {} : period))} loading={busy === 'csv'}>{t('common.exportCsv')}</Button>}
     </div>
   )
 }
@@ -86,7 +90,7 @@ function SalesReport({ period }) {
     <QueryState query={query} skeleton={<Skeleton className="h-64" />}>
       {(d) => (
         <div className="space-y-3">
-          <Toolbar exportType="sales" period={period} />
+          <Toolbar exportType="sales" period={period} onPdf={(s) => salesPdf(d, s, label)} />
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             <StatCard label={t('reports.salesRevenue')} value={money(d.summary.sales)} sub={`${num(d.summary.transactions)} ${t('sales.transactions')}`} tone="brand" />
             <StatCard label={t('reports.grossProfit')} value={money(d.summary.gross_profit)} sub={`${t('reports.grossMargin')} ${percent(d.summary.gross_margin)}`} tone="green" />
@@ -170,7 +174,7 @@ function ProfitReport({ period }) {
         )
         return (
           <div className="space-y-3">
-            <Toolbar period={period} />
+            <Toolbar period={period} onPdf={(s) => profitPdf(d, s)} />
             <Card className="print-area overflow-hidden">
               <div className="divide-y divide-slate-100">
                 {line(t('reports.salesRevenue'), d.revenue, 'font-semibold')}
@@ -216,7 +220,7 @@ function ProductSalesReport({ period }) {
         const net = toNumber(tot.net_profit)
         return (
           <div className="space-y-3">
-            <Toolbar exportType="product-sales" period={period} />
+            <Toolbar exportType="product-sales" period={period} onPdf={(s) => productSalesPdf(d, s)} />
             {d.rows.length === 0 ? (
               <EmptyState icon={Package} title={t('sales.noSalesPeriod')} />
             ) : (
@@ -299,7 +303,7 @@ function StockReport() {
         const items = d.items.filter((p) => p.is_active && (filter === 'all' || p.shop_status === filter || p.store_status === filter))
         return (
           <div className="space-y-3">
-            <Toolbar exportType="stock" />
+            <Toolbar exportType="stock" onPdf={(s) => stockPdf(d, items, s)} />
             <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
               <StatCard label={t('stock.storeStock')} value={num(d.totals.store.qty)} sub={money(d.totals.store.value)} tone="brand" />
               <StatCard label={t('stock.shopStock')} value={num(d.totals.shop.qty)} sub={money(d.totals.shop.value)} tone="blue" />
@@ -351,7 +355,7 @@ function UdhariReport({ period }) {
     <QueryState query={query} skeleton={<Skeleton className="h-80" />}>
       {(d) => (
         <div className="space-y-3">
-          <Toolbar exportType="udhari" period={period} />
+          <Toolbar exportType="udhari" period={period} onPdf={(s) => udhariPdf(d, s)} />
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             <StatCard label={t('reports.totalOutstanding')} value={money(d.total_outstanding)} sub={t('dashboard.customersWithDues', { count: d.customers_with_dues })} tone="red" />
             <StatCard label={t('reports.udhariGiven')} value={money(d.udhari_given)} tone="amber" />
@@ -396,7 +400,7 @@ function ExpenseReport({ period }) {
     <QueryState query={query} skeleton={<Skeleton className="h-80" />}>
       {(d) => (
         <div className="space-y-3">
-          <Toolbar exportType="expenses" period={period} />
+          <Toolbar exportType="expenses" period={period} onPdf={(s) => expensesPdf(d, s)} />
           <StatCard label={t('expenses.total')} value={money(d.total)} tone="red" />
           {d.by_category.length === 0 ? (
             <EmptyState icon={Wallet} title={t('expenses.empty')} />
