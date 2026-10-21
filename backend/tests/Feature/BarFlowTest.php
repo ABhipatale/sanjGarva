@@ -242,6 +242,31 @@ class BarFlowTest extends TestCase
         $this->assertSame(['store' => 6, 'shop' => 0], $this->qty($rum['id']));
     }
 
+    public function test_product_sales_report_and_excel_export(): void
+    {
+        $beer = $this->product(['opening_store' => 0, 'opening_shop' => 50]); // cost 100, sell 150
+        $rum = $this->product(['name' => 'Old Monk', 'cost_price' => 300, 'selling_price' => 400, 'opening_store' => 0, 'opening_shop' => 10]);
+        $this->postJson('/api/sales', ['items' => [['product_id' => $beer['id'], 'quantity' => 6], ['product_id' => $rum['id'], 'quantity' => 2]], 'payment_method' => 'cash'])->assertCreated();
+        $this->postJson('/api/sales', ['items' => [['product_id' => $beer['id'], 'quantity' => 4]], 'payment_method' => 'cash'])->assertCreated();
+        $void = $this->postJson('/api/sales', ['items' => [['product_id' => $rum['id'], 'quantity' => 5]], 'payment_method' => 'cash'])->json('data');
+        $this->postJson("/api/sales/{$void['id']}/void")->assertOk(); // cancelled bills are not counted
+        $this->postJson('/api/expenses', ['expense_category_id' => ExpenseCategory::where('kind', 'bar')->first()->id, 'amount' => 900, 'expense_date' => now()->toDateString()]);
+
+        // Beer 10 × (150 − 100) = 500 profit; rum 2 × (400 − 300) = 200.
+        $d = $this->getJson('/api/reports/product-sales?period=today')->assertOk()->json('data');
+        $this->assertSame([$beer['id'], $rum['id']], array_column($d['rows'], 'product_id'));
+        $this->assertSame(10, $d['rows'][0]['qty']);
+        $this->assertSame('1000.00', $d['rows'][0]['cost']);
+        $this->assertSame('1500.00', $d['rows'][0]['sales']);
+        $this->assertSame('500.00', $d['rows'][0]['profit']);
+        $this->assertSame(['products' => 2, 'qty' => 12, 'cost' => '1600.00', 'sales' => '2300.00', 'profit' => '700.00', 'margin' => '30.4', 'expenses' => '900.00', 'net_profit' => '-200.00'], $d['totals']);
+
+        $csv = $this->get('/api/export/product-sales?period=today')->assertOk()->streamedContent();
+        $this->assertStringContainsString('Kingfisher,,,10,100.00,150.00,1000.00,1500.00,500.00,33.3', $csv);
+        $this->assertStringContainsString(',TOTAL,,,12,,,1600.00,2300.00,700.00,30.4', $csv);
+        $this->assertStringContainsString('"NET LOSS",-200.00', $csv);
+    }
+
     public function test_weighted_average_cost_and_historical_profit(): void
     {
         $p = $this->product(['opening_store' => 10, 'opening_shop' => 0, 'cost_price' => 100]);

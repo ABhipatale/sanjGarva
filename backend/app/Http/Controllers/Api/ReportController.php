@@ -30,6 +30,12 @@ class ReportController extends Controller
         ]);
     }
 
+    /** Product-wise sales: ?period=today|week|month|... or ?from=&to= */
+    public function productSales(Request $request): JsonResponse
+    {
+        return $this->ok($this->reports->productSales(DateRange::fromRequest($request, 'today')));
+    }
+
     public function stock(): JsonResponse
     {
         return $this->ok($this->reports->stock());

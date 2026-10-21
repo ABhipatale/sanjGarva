@@ -13,7 +13,7 @@ import SaleDetailModal from '../../components/SaleDetailModal'
 import { productApi, saleApi } from '../../services/endpoints'
 import { useToast } from '../../context/ToastContext'
 import { useConfirm } from '../../context/ConfirmContext'
-import { useInvalidateBusiness } from '../../hooks/queries'
+import { useCategories, useInvalidateBusiness } from '../../hooks/queries'
 import { storage } from '../../utils/storage'
 import { localName, money, num } from '../../utils/format'
 
@@ -88,6 +88,8 @@ function ClosingForm({ location, onSaved }) {
   const confirm = useConfirm()
   const invalidate = useInvalidateBusiness()
   const [search, setSearch] = useState('')
+  const [category, setCategory] = useState('')
+  const { data: categories = [] } = useCategories()
   const [method, setMethod] = useState('cash')
   const [counts, setCounts] = useState(() => {
     try {
@@ -127,11 +129,25 @@ function ClosingForm({ location, onSaved }) {
     [products, counts, qtyKey],
   )
 
+  const inCategory = (p, id) => p.category_id === id || p.sub_category_id === id
+
+  // Category chips like New Sale (Beer, Whisky…), only for categories that have stock to count here.
+  const categoryOptions = useMemo(() => {
+    const options = categories
+      .filter((c) => !c.parent_id)
+      .map((c) => ({ value: c.id, label: localName(c), count: rows.filter((r) => inCategory(r.p, c.id)).length }))
+      .filter((o) => o.count > 0)
+    return options.length ? [{ value: '', label: t('common.all'), count: rows.length }, ...options] : []
+  }, [categories, rows, t])
+
   const visible = useMemo(() => {
     const term = search.trim().toLowerCase()
-    if (!term) return rows
-    return rows.filter(({ p }) => [p.name, p.name_mr, p.brand, p.bottle_size].some((v) => v && String(v).toLowerCase().includes(term)))
-  }, [rows, search])
+    return rows.filter(
+      ({ p }) =>
+        (!category || inCategory(p, category)) &&
+        (!term || [p.name, p.name_mr, p.brand, p.bottle_size].some((v) => v && String(v).toLowerCase().includes(term))),
+    )
+  }, [rows, search, category])
 
   const soldRows = rows.filter((r) => r.sold > 0)
   const countedCount = rows.filter((r) => r.counted).length
@@ -237,6 +253,9 @@ function ClosingForm({ location, onSaved }) {
           </Button>
         )}
       </div>
+      {categoryOptions.length > 0 && (
+        <Segmented scroll className="mt-3" value={category} onChange={setCategory} ariaLabel={t('products.category')} options={categoryOptions} />
+      )}
       <p className="mt-2 text-sm font-semibold text-slate-500">{t('closing.countedOf', { done: countedCount, total: rows.length })}</p>
 
       <ul className="mt-2 divide-y divide-slate-100 overflow-hidden rounded-2xl bg-white shadow-card ring-1 ring-slate-200/70">

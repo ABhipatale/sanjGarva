@@ -480,7 +480,15 @@
     "customerWise": "ग्राहकानुसार बाकी",
     "totalStock": "एकूण",
     "categoryWise": "प्रकारानुसार",
-    "dateWise": "तारखेनुसार"
+    "dateWise": "तारखेनुसार",
+    "products": "मालनिहाय विक्री",
+    "qtySold": "विकले",
+    "avgCost": "खरेदी दर",
+    "avgPrice": "विक्री दर",
+    "totalCost": "एकूण खरेदी किंमत",
+    "totalSelling": "एकूण विक्री",
+    "grandTotal": "एकूण बेरीज",
+    "totalQtySold": "एकूण विकलेला स्टॉक"
   },
   "settings": {
     "title": "सेटिंग्ज",

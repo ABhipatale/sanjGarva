@@ -91,6 +91,7 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
 
     // Reports & export
     Route::get('reports/sales', [ReportController::class, 'sales']);
+    Route::get('reports/product-sales', [ReportController::class, 'productSales']);
     Route::get('reports/stock', [ReportController::class, 'stock']);
     Route::get('reports/profit-loss', [ReportController::class, 'profitLoss']);
     Route::get('reports/udhari', [ReportController::class, 'udhari']);

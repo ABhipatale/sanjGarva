@@ -87,6 +87,7 @@ export const expenseApi = {
 
 export const reportApi = {
   sales: (params) => api.get('/reports/sales', params),
+  productSales: (params) => api.get('/reports/product-sales', params),
   stock: () => api.get('/reports/stock'),
   profitLoss: (params) => api.get('/reports/profit-loss', params),
   udhari: (params) => api.get('/reports/udhari', params),

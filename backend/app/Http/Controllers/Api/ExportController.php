@@ -11,6 +11,7 @@ use App\Models\Sale;
 use App\Models\SaleItem;
 use App\Models\StockTransaction;
 use App\Services\ReportService;
+use App\Services\SettingsService;
 use App\Support\DateRange;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -20,7 +21,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
  */
 class ExportController extends Controller
 {
-    public const TYPES = ['sales', 'sale-items', 'customers', 'udhari', 'expenses', 'stock', 'movements', 'purchases'];
+    public const TYPES = ['product-sales', 'sales', 'sale-items', 'customers', 'udhari', 'expenses', 'stock', 'movements', 'purchases'];
 
     public function __invoke(Request $request, string $type, ReportService $reports): StreamedResponse
     {
@@ -36,6 +37,43 @@ class ExportController extends Controller
         }, $filename, ['Content-Type' => 'text/csv; charset=UTF-8']);
     }
 
+    /**
+     * Product-wise sales sheet: title block, one row per product, a TOTAL row and a profit / loss
+     * summary. Amounts are plain numbers so Excel can sum and format them.
+     */
+    private function productSales($out, DateRange $range, ReportService $reports): void
+    {
+        $report = $reports->productSales($range);
+        $totals = $report['totals'];
+        $bar = app(SettingsService::class)->get('bar_name') ?: config('app.name');
+        $period = $range->from || $range->to
+            ? ($range->from?->format('d-m-Y') ?? '…').' to '.($range->to?->format('d-m-Y') ?? '…')
+            : 'All time';
+
+        fputcsv($out, [$bar.' - Product-wise Sales Report']);
+        fputcsv($out, ['Period', $period]);
+        fputcsv($out, ['Generated', now()->format('d-m-Y H:i')]);
+        fputcsv($out, []);
+
+        fputcsv($out, ['Sr', 'Product', 'Size', 'Category', 'Qty Sold', 'Avg Cost Rate', 'Avg Selling Rate', 'Total Cost', 'Total Selling', 'Profit / Loss', 'Margin %']);
+        foreach ($report['rows'] as $i => $r) {
+            fputcsv($out, [$i + 1, $r['name'], $r['bottle_size'], $r['category'], $r['qty'], $r['avg_cost'], $r['avg_price'],
+                $r['cost'], $r['sales'], $r['profit'], $r['margin']]);
+        }
+        fputcsv($out, ['', 'TOTAL', '', '', $totals['qty'], '', '', $totals['cost'], $totals['sales'], $totals['profit'], $totals['margin']]);
+        fputcsv($out, []);
+
+        $net = $totals['net_profit'];
+        fputcsv($out, ['Summary']);
+        fputcsv($out, ['Products sold', $totals['products']]);
+        fputcsv($out, ['Total stock sold (qty)', $totals['qty']]);
+        fputcsv($out, ['Total selling amount', $totals['sales']]);
+        fputcsv($out, ['Total cost', $totals['cost']]);
+        fputcsv($out, ['Gross profit', $totals['profit']]);
+        fputcsv($out, ['Bar expenses', $totals['expenses']]);
+        fputcsv($out, [str_starts_with($net, '-') ? 'NET LOSS' : 'NET PROFIT', $net]);
+    }
+
     private function write($out, string $type, DateRange $range, ReportService $reports): void
     {
         $between = function ($query, string $column, bool $dateOnly = false) use ($range) {
@@ -45,6 +83,10 @@ class ExportController extends Controller
         };
 
         switch ($type) {
+            case 'product-sales':
+                $this->productSales($out, $range, $reports);
+                break;
+
             case 'sales':
                 fputcsv($out, ['Bill No', 'Date', 'Customer', 'Payment', 'Qty', 'Amount', 'Cost', 'Profit', 'Status']);
                 $between(Sale::with('customer:id,name'), 'sold_at')->orderBy('id')->chunk(500, function ($rows) use ($out) {

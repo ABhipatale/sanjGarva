@@ -110,6 +110,79 @@ class ReportService
     }
 
     /** Bar expenses by default: home expenses never reduce the business profit. */
+    /**
+     * Product-wise sales for a period: quantity sold, cost, selling amount and profit per product
+     * (from the cost stored on each sale line, so history never changes), with grand totals and the
+     * net profit / loss after bar expenses.
+     */
+    public function productSales(DateRange $range): array
+    {
+        $rows = SaleItem::query()
+            ->join('sales', 'sales.id', '=', 'sale_items.sale_id')
+            ->leftJoin('products', 'products.id', '=', 'sale_items.product_id')
+            ->leftJoin('categories', 'categories.id', '=', 'products.category_id')
+            ->where('sales.status', 'completed')
+            ->when($range->from, fn ($q) => $q->where('sales.sold_at', '>=', $range->from))
+            ->when($range->to, fn ($q) => $q->where('sales.sold_at', '<=', $range->to))
+            ->groupBy('sale_items.product_id', 'products.name', 'products.name_mr', 'products.bottle_size', 'categories.name', 'categories.name_mr')
+            ->select('sale_items.product_id', 'products.name', 'products.name_mr', 'products.bottle_size')
+            ->selectRaw('categories.name AS category, categories.name_mr AS category_mr')
+            ->selectRaw('MAX(sale_items.product_name) AS product_name')
+            ->selectRaw('SUM(sale_items.quantity) AS qty')
+            ->selectRaw('SUM(sale_items.line_total) AS sales')
+            ->selectRaw('SUM(sale_items.line_cost) AS cost')
+            ->selectRaw('SUM(sale_items.line_profit) AS profit')
+            ->orderByDesc('sales')
+            ->toBase()
+            ->get()
+            ->map(function ($r) {
+                $qty = (int) $r->qty;
+
+                return [
+                    'product_id' => (int) $r->product_id,
+                    'name' => $r->name ?? $r->product_name,
+                    'name_mr' => $r->name_mr,
+                    'bottle_size' => $r->bottle_size,
+                    'category' => $r->category,
+                    'category_mr' => $r->category_mr,
+                    'qty' => $qty,
+                    'avg_cost' => $qty ? Money::round(Money::div($r->cost, $qty), 2) : '0.00',
+                    'avg_price' => $qty ? Money::round(Money::div($r->sales, $qty), 2) : '0.00',
+                    'cost' => Money::round($r->cost, 2),
+                    'sales' => Money::round($r->sales, 2),
+                    'profit' => Money::round($r->profit, 2),
+                    'margin' => Money::percent($r->profit, $r->sales),
+                ];
+            })
+            ->all();
+
+        $sales = '0';
+        $cost = '0';
+        $profit = '0';
+        foreach ($rows as $row) {
+            $sales = Money::add($sales, $row['sales']);
+            $cost = Money::add($cost, $row['cost']);
+            $profit = Money::add($profit, $row['profit']);
+        }
+        $expenses = $this->expenseTotal($range);
+        $net = Money::round(Money::sub($profit, $expenses), 2);
+
+        return [
+            'range' => $range->toArray(),
+            'rows' => $rows,
+            'totals' => [
+                'products' => count($rows),
+                'qty' => array_sum(array_column($rows, 'qty')),
+                'cost' => Money::round($cost, 2),
+                'sales' => Money::round($sales, 2),
+                'profit' => Money::round($profit, 2),
+                'margin' => Money::percent($profit, $sales),
+                'expenses' => $expenses,
+                'net_profit' => $net,
+            ],
+        ];
+    }
+
     public function expenseTotal(DateRange $range, string $kind = 'bar'): string
     {
         return Money::round($this->expenseQuery($range, $kind)->sum('amount'), 2);

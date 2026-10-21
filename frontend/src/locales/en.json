@@ -480,7 +480,15 @@
     "customerWise": "Customer-wise Outstanding",
     "totalStock": "Total",
     "categoryWise": "Category-wise",
-    "dateWise": "Date-wise"
+    "dateWise": "Date-wise",
+    "products": "Product Sales",
+    "qtySold": "Qty Sold",
+    "avgCost": "Cost Rate",
+    "avgPrice": "Selling Rate",
+    "totalCost": "Total Cost",
+    "totalSelling": "Total Selling",
+    "grandTotal": "Grand Total",
+    "totalQtySold": "Total stock sold"
   },
   "settings": {
     "title": "Settings",

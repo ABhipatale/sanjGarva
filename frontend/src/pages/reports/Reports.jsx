@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { BarChart3, Boxes, FileSpreadsheet, HandCoins, Printer, Scale, Wallet } from 'lucide-react'
+import { BarChart3, Boxes, FileSpreadsheet, HandCoins, Package, Printer, Scale, Wallet } from 'lucide-react'
 import clsx from 'clsx'
 import PageHeader from '../../components/ui/PageHeader'
 import PeriodFilter from '../../components/ui/PeriodFilter'
@@ -19,6 +19,7 @@ import { formatDate, localName, money, num, percent, toNumber } from '../../util
 
 const TABS = [
   { value: 'sales', icon: BarChart3 },
+  { value: 'products', icon: Package },
   { value: 'profit', icon: Scale },
   { value: 'stock', icon: Boxes },
   { value: 'udhari', icon: HandCoins },
@@ -44,6 +45,7 @@ export default function Reports() {
       </div>
       {tab !== 'stock' && <PeriodFilter value={period} onChange={setPeriod} />}
       {tab === 'sales' && <SalesReport period={period} />}
+      {tab === 'products' && <ProductSalesReport period={period} />}
       {tab === 'profit' && <ProfitReport period={period} />}
       {tab === 'stock' && <StockReport />}
       {tab === 'udhari' && <UdhariReport period={period} />}
@@ -195,6 +197,90 @@ function ProfitReport({ period }) {
                 </ul>
               </Card>
             )}
+          </div>
+        )
+      }}
+    </QueryState>
+  )
+}
+
+/** Product-wise: qty sold, cost, selling and profit per product, with grand totals and net profit / loss. */
+function ProductSalesReport({ period }) {
+  const { t } = useTranslation()
+  const query = useQuery({ queryKey: ['reports', 'product-sales', period], queryFn: () => reportApi.productSales(period).then((r) => r.data) })
+
+  return (
+    <QueryState query={query} skeleton={<Skeleton className="h-64" />}>
+      {(d) => {
+        const tot = d.totals
+        const net = toNumber(tot.net_profit)
+        return (
+          <div className="space-y-3">
+            <Toolbar exportType="product-sales" period={period} />
+            {d.rows.length === 0 ? (
+              <EmptyState icon={Package} title={t('sales.noSalesPeriod')} />
+            ) : (
+              <DataTable
+                rows={d.rows}
+                rowKey={(r) => r.product_id}
+                columns={[
+                  { key: 'name', header: t('products.name'), render: (r) => <span><b>{localName(r)}</b>{r.bottle_size && <span className="text-slate-500"> · {r.bottle_size}</span>}</span> },
+                  { key: 'qty', header: t('reports.qtySold'), align: 'right', render: (r) => <b>{num(r.qty)}</b> },
+                  { key: 'avg_cost', header: t('reports.avgCost'), align: 'right', render: (r) => money(r.avg_cost) },
+                  { key: 'avg_price', header: t('reports.avgPrice'), align: 'right', render: (r) => money(r.avg_price) },
+                  { key: 'cost', header: t('reports.totalCost'), align: 'right', render: (r) => money(r.cost) },
+                  { key: 'sales', header: t('reports.totalSelling'), align: 'right', render: (r) => <b>{money(r.sales)}</b> },
+                  { key: 'profit', header: t('sales.profit'), align: 'right', render: (r) => <b className={toNumber(r.profit) < 0 ? 'text-rose-600' : 'text-emerald-700'}>{money(r.profit)}</b> },
+                  { key: 'margin', header: '%', align: 'right', render: (r) => percent(r.margin) },
+                ]}
+                footer={
+                  <tr>
+                    <td className="px-4 py-3">{t('common.total')} · {num(tot.products)}</td>
+                    <td className="px-4 py-3 text-right">{num(tot.qty)}</td>
+                    <td className="px-4 py-3" colSpan={2} />
+                    <td className="px-4 py-3 text-right">{money(tot.cost)}</td>
+                    <td className="px-4 py-3 text-right">{money(tot.sales)}</td>
+                    <td className={clsx('px-4 py-3 text-right', toNumber(tot.profit) < 0 ? 'text-rose-600' : 'text-emerald-700')}>{money(tot.profit)}</td>
+                    <td className="px-4 py-3 text-right">{percent(tot.margin)}</td>
+                  </tr>
+                }
+                renderCard={(r) => (
+                  <div>
+                    <div className="flex items-baseline justify-between gap-3">
+                      <p className="min-w-0 truncate font-bold text-slate-900">{localName(r)}</p>
+                      <p className="shrink-0 text-lg font-extrabold tabular-nums">× {num(r.qty)}</p>
+                    </div>
+                    <div className="mt-1 grid grid-cols-3 gap-2 text-sm">
+                      <p><span className="block text-slate-500">{t('reports.totalCost')}</span><b className="tabular-nums">{money(r.cost)}</b></p>
+                      <p><span className="block text-slate-500">{t('reports.totalSelling')}</span><b className="tabular-nums">{money(r.sales)}</b></p>
+                      <p className="text-right"><span className="block text-slate-500">{t('sales.profit')}</span><b className={clsx('tabular-nums', toNumber(r.profit) < 0 ? 'text-rose-600' : 'text-emerald-700')}>{money(r.profit)}</b></p>
+                    </div>
+                  </div>
+                )}
+              />
+            )}
+
+            <Card className="p-4 sm:p-5">
+              <CardHeader title={t('reports.grandTotal')} className="!p-0 !pb-3" />
+              <dl className="space-y-2 text-[15px]">
+                {[
+                  [t('reports.totalQtySold'), num(tot.qty)],
+                  [t('reports.totalSelling'), money(tot.sales)],
+                  [t('reports.totalCost'), money(tot.cost)],
+                  [t('reports.grossProfit'), money(tot.profit)],
+                  [`− ${t('reports.expenses_total')}`, money(tot.expenses)],
+                ].map(([label, value]) => (
+                  <div key={label} className="flex justify-between">
+                    <dt className="font-semibold text-slate-600">{label}</dt>
+                    <dd className="font-bold tabular-nums">{value}</dd>
+                  </div>
+                ))}
+                <div className="flex items-baseline justify-between border-t border-slate-200 pt-2">
+                  <dt className="text-lg font-extrabold text-slate-900">{net < 0 ? t('reports.netLoss') : t('reports.netProfit')}</dt>
+                  <dd className={clsx('text-3xl font-extrabold tabular-nums', net < 0 ? 'text-rose-600' : 'text-emerald-700')}>{money(tot.net_profit)}</dd>
+                </div>
+              </dl>
+            </Card>
           </div>
         )
       }}
